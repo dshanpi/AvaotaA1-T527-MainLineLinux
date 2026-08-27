@@ -1,0 +1,16 @@
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
+index 474354fbf..4f2138716 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
+@@ -170,8 +170,11 @@ &mmc0 {
+ &mmc2 {
+ 	bus-width = <8>;
+ 	cap-mmc-hw-reset;
++	no-sd;
++	no-sdio;
+ 	mmc-ddr-1_8v;
+ 	mmc-hs200-1_8v;
++	max-frequency = <25000000>;
+ 	non-removable;
+ 	vmmc-supply = <&reg_cldo3>;
+ 	vqmmc-supply = <&reg_cldo1>;

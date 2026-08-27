@@ -1,0 +1,7 @@
+# Clean-output software build; not hardware-qualified
+avaota-a1-full-mainline.img 805306368 ee4935777ce2468c539c7219a0fb507ae41d424eca6ea94ec4090106740bd9c1 structural-verifier-pass-not-hil
+avaota-a1-full-mainline.img.xz 42630224 91cab30d9ff5d42ca920982301b4a4469546f37983d2c516a5c883eafd0b8a65 packaged-not-hil
+
+# The hardware-qualified image remains listed in verified-artifacts.txt.
+# Build timestamps are not yet normalized, so a rebuild may have a different
+# whole-image hash while all pinned sources and structural checks remain equal.

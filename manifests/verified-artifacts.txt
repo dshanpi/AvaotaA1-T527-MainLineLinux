@@ -1,0 +1,5 @@
+# Hardware-qualified artifacts, 2026-08-27
+avaota-a1-mainline-emmc-rootdev-linux7.2.img 805306368 7e2b0c34dde11dd0a73a810e6918640a941a703433a23f501c807e9d055b6bae verified-cold-boot
+mainline-spl-from-image@0x2000 49152 911eebcdfbdfae1f4802ea2aafa1ea523cc82b4047491c915d2c7bd0c3be3fe9 verified-fes-boot0-status
+cold-boot-uart-log 38585 c0d45bf75c1c97eb3c231ef09a2ce9d57306cd58f954e598b1c9914bb3cde658 verified-login
+fes-flash-full-log 2331511 5c4bb5df5d6fa999bb84e728f109e087f523968144e7dff8f3970c81205c8275 archived-locally

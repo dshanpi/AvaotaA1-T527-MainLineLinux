@@ -1,0 +1,37 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    log=/var/log/avaota-validation.log
+    {
+      echo "Avaota A1 automatic peripheral inventory"
+      date -u
+      uname -a
+      echo "[block]"
+      lsblk
+      echo "[network]"
+      ip addr show
+      ethtool eth0 2>/dev/null || true
+      ethtool eth1 2>/dev/null || true
+      echo "[usb]"
+      lsusb 2>/dev/null || true
+      echo "[graphics]"
+      ls -l /dev/dri 2>/dev/null || true
+      echo "[audio]"
+      aplay -l 2>/dev/null || true
+      echo "[rtc]"
+      hwclock -r 2>/dev/null || true
+      echo "[thermal/hwmon]"
+      for value in /sys/class/thermal/thermal_zone*/temp /sys/class/hwmon/hwmon*/temp*_input; do
+        [ -r "$value" ] && echo "$value=$(cat "$value")"
+      done
+      echo "[mtd]"
+      cat /proc/mtd 2>/dev/null || true
+    } > "$log" 2>&1
+    for trigger in /sys/class/leds/*/trigger; do
+      [ -w "$trigger" ] && echo heartbeat > "$trigger" 2>/dev/null && break
+    done
+    ;;
+esac
+
+exit 0

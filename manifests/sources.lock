@@ -1,0 +1,9 @@
+# name|kind|version|url|sha256-or-commit
+buildroot|archive|2026.05.1|https://buildroot.org/downloads/buildroot-2026.05.1.tar.xz|ae7f706f087b9ae9083a10a587368dfbf53103c28bf81c2d690198dc4090cb58
+linux|archive|7.2|https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.2.tar.xz|f9fef3d14c0df53819026f4be74459835c2a0b0dcbf5b5bbd9ea19f0829402b3
+u-boot|archive|2026.07|https://ftp.denx.de/pub/u-boot/u-boot-2026.07.tar.bz2|78e8bfc382fe388f9b55aa1daf8c563522a037779b5d4c349d1415e381f1243e
+toolchain|archive|10.3-2021.07|https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz|1e33d53dea59c8de823bbdfe0798280bdcd138636c7060da9d77a97ded095a84
+trusted-firmware-a|git|a523-mainline|https://github.com/ARM-software/arm-trusted-firmware.git|b5de74a685fb73b784e45bbbd18dd9a0c528d8b2
+libxcrypt|git|mainline-build-fix|https://github.com/besser82/libxcrypt.git|db70b42bd7b2a5b00a8580c8dec0aa66791c950a
+openixcli|git|t527-mainline-emmc-fes|https://github.com/100askTeam/OpenixCLI.git|eacd5127564fa90b1a106251197404f62658469f
+libefex|git|fes-windows-portability|https://github.com/100askTeam/libefex.git|ae33d120a103e1cd56437ea254c6e78cdf4f7f93

@@ -1,0 +1,18 @@
+{"type":"artifact","name":"avaota-a1-mainline-emmc-rootdev-linux7.2.img","size":805306368,"sha256":"7e2b0c34dde11dd0a73a810e6918640a941a703433a23f501c807e9d055b6bae"}
+{"type":"log","level":"info","message":"Device mode: Fel"}
+{"type":"log","level":"info","message":"FES_BOOTSTRAP_RAM_ONLY:begin"}
+{"type":"stage","stage":"DRAM Init","status":"success"}
+{"type":"stage","stage":"U-Boot Download","status":"success"}
+{"type":"log","level":"info","message":"FES_RECONNECT_DEVICE_ID_MAPPING fel=0x00189000 fes=0x00161000"}
+{"type":"stage","stage":"Reconnecting","status":"success"}
+{"type":"log","level":"info","message":"FES_BOOTSTRAP_RAM_ONLY:ready"}
+{"type":"log","level":"info","message":"RAW_TARGET_STORAGE:eMMC"}
+{"type":"log","level":"info","message":"RAW_TARGET_CAPACITY:62537072640"}
+{"type":"log","level":"info","message":"EMMC_BOOT0_ARTIFACT:source=image@0x2000,bytes=49152,sha256=911eebcdfbdfae1f4802ea2aafa1ea523cc82b4047491c915d2c7bd0c3be3fe9"}
+{"type":"log","level":"info","message":"EMMC_BOOT0_WRITE_START:method=fes_boot0_component"}
+{"type":"log","level":"info","message":"EMMC_BOOT0_VERIFIED:method=fes_boot0_status,bytes=49152,sourceSha256=911eebcdfbdfae1f4802ea2aafa1ea523cc82b4047491c915d2c7bd0c3be3fe9"}
+{"type":"stage","stage":"Flashing Partitions","status":"success"}
+{"type":"verify","status":"success","errorCode":0}
+{"type":"post_action","action":"none","status":"skipped","attempt":0,"error":null}
+{"type":"finished","postAction":"none"}
+{"type":"log","level":"success","message":"Raw disk image flashed successfully"}

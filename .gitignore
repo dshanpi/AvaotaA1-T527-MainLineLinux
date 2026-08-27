@@ -1,0 +1,6 @@
+/.cache/
+/.work/
+/out/
+*.img
+*.img.xz
+*.img.zst

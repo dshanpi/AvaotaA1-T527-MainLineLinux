@@ -1,0 +1,6 @@
+# UART transcripts are byte-preserved evidence. Do not normalize CR/LF or
+# reinterpret their terminal-generated trailing whitespace.
+logs/*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+
+# Unified diffs use a leading context marker before the source indentation.
+patches/**/*.patch whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab

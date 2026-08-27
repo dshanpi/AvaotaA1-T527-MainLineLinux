@@ -1,0 +1,893 @@
+  show_stack+0x18/0x24 (C)
+[    2.167853]  dump_stack_lvl+0x38/0x90
+[    2.171525]  dump_stack+0x18/0x24
+[    2.174846]  vpanic+0x4e8/0x4ec
+[    2.177998]  do_panic_on_target_cpu+0x0/0x1c
+[    2.182277]  mount_root_generic+0x1d0/0x2d0
+[    2.186468]  mount_root+0x160/0x2d8
+[    2.189962]  prepare_namespace+0x64/0x2bc
+[    2.193976]  kernel_init_freeable+0x264/0x2f4
+[    2.198336]  kernel_init+0x24/0x1dc
+[    2.201831]  ret_from_fork+0x10/0x20
+[    2.205413] SMP: stopping secondary CPUs
+[    2.209348] Kernel Offset: disabled
+[    2.212834] CPU features: 0x04000000,0010000a,80460521,0400721b
+[    2.218752] Memory Limit: none
+[    2.221808] ---[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0) ]---
+[45862]fes begin commit:ec69381431
+[45866]periph0 has been enabled
+[45869]set pll end
+[45871]PL gpio voltage : 3.3V 
+[45875][pmu]: bus read error
+[45878]PMU: AXP2202
+[45882]PMU: AXP1530
+[45885]power mode:33, sys_vol:920
+[45898]dram_para_total:0x20
+[45900]vaild para:16  select dram para7
+[45904]board init ok
+[45906]beign to init dram
+[45909]DRAM BOOT DRIVE INFO: V0.67
+[45912]DRAM_VCC set to 1160 mv
+[46035]DRAM retraining ten 
+[46051][AUTO DEBUG]32bit,2 ranks training success!
+[46079]Soft Training Version: T2.0
+[50674][SOFT TRAINING] CLK=924M Stable memtest pass
+[50678]DRAM CLK =924 MHZ
+[50681]DRAM Type =8 (3:DDR3,4:DDR4,7:LPDDR3,8:LPDDR4)
+[50691]DRAM SIZE =4096 MBytes, para1 = 310a, para2 = 10001000, tpr13 = 6461
+[50700]DRAM simple test OK.
+[50703]init dram ok
+
+
+U-Boot 2018.07-g29af98e (Apr 02 2024 - 08:51:15 +0000) Allwinner Technology
+
+[54.370]CPU:   Allwinner Family
+[54.373]Model: sun55iw3
+I2C:   ready
+[54.384]DRAM:  512 MiB
+[54.389]Relocation Offset is: 15e98000
+[54.440]secure enable bit: 0
+[54.443]PMU: AXP2202
+[54.445]PMU: pmu_axp2202 found
+[54.448][AXP2202] dcdc1_mode:1
+[54.451][AXP2202] dcdc3_mode:1
+[54.454][AXP2202] dcdc2_mode:1
+[54.456][AXP2202] b12 mode is: 0
+[54.460][AXP2202] input limit set to:0x26
+[54.464]bldo1_vol = 0, onoff=0
+[54.467]bldo2_vol = 1800, onoff=1
+[54.471]bldo3_vol = 1800, onoff=1
+[54.474]cldo2_vol = 1800, onoff=1
+[54.478]cldo4_vol = 0, onoff=0
+[54.481]BMU: AXP2202
+[54.483]BMU: bmu_axp2202 found
+[54.486]bat not exist.
+[54.489][AXP2202] comm status : 0x0 = 0x20, 0x1 = 0x90
+[54.494][AXP2202] onoff status: 0x20 = 0x4, 0x21 = 0x0
+[54.499][AXP2202] reboot/charge status: 0xf0 = 0x0
+[54.503][AXP2202] input limit:0x26
+[54.506]PMU: AXP1530
+[54.508]PMU_EXT: pmu_axp1530 found
+[54.512][AXP1530] ext_dcdc1_mode:1
+[54.515][AXP1530] ext_dcdc2_mode:1
+
+[54.518]CPU=1296 MHz,PLL6=600 Mhz,AHB=200 Mhz, APB1=100Mhz  MBus=462Mhz
+[54.524]gic: normal mode
+[54.527]sunxi flash type@0 not support fast burn key
+[54.531]sunxi flash map init
+[54.534]init_clocks:finish
+[54.537]flash init start
+[54.539]workmode = 16,storage type = 0
+try card 2
+set card number 2
+get card number 2
+[54.547][mmc]: mmc driver ver uboot2018:2023-08-29 10:12:00
+[54.553][mmc]: Is not Boot mode!
+[54.556][mmc]: SUNXI SDMMC Controller Version:0x50500
+[54.567][mmc]: ************Try SD card 2************
+[54.572][mmc]: mmc 2 cmd timeout 100 status 100
+[54.576][mmc]: smc 2 err, cmd 8,  RTO
+[54.579][mmc]: mmc 2 close bus gating and reset
+[54.584][mmc]: mmc 2 cmd timeout 100 status 100
+[54.588][mmc]: smc 2 err, cmd 55,  RTO
+[54.592][mmc]: mmc 2 close bus gating and reset
+[54.596][mmc]: ************Try MMC card 2************
+[54.768][mmc]: mmc 2 cmd timeout 100 status 100
+[54.772][mmc]: smc 2 err, cmd 8,  RTO
+[54.775][mmc]: mmc 2 close bus gating and reset
+[54.780][mmc]: mmc 2 cmd timeout 100 status 100
+[54.784][mmc]: smc 2 err, cmd 55,  RTO
+[54.787][mmc]: mmc 2 close bus gating and reset
+[54.961][mmc]: gen_tuning_blk_bus8: total blk 10
+[54.966][mmc]: gen_tuning_blk_bus4: total blk 6
+[54.970][mmc]: Using 8 bit tuning now
+[54.976][mmc]: write_tuning_try_freq: write ok
+[54.980][mmc]: Pattern compare ok
+[54.983][mmc]: Write tuning pattern ok
+[54.986][mmc]: ================== HSSDR52_SDR25...
+[54.991][mmc]: skip freq 400000
+[54.994][mmc]: skip freq 25000000
+[54.997][mmc]: freq: 2-50000000-64-4
+[55.250][mmc]: [0-63|64] 
+[55.252][mmc]: ================== HS200_SDR104...
+[55.257][mmc]: skip freq 400000
+[55.259][mmc]: skip freq 25000000
+[55.262][mmc]: freq: 2-50000000-64-4
+[55.516][mmc]: freq: 3-100000000-64-4
+[55.737][mmc]: freq: 4-150000000-64-4
+[55.892][mmc]: skip freq 200000000
+[55.895][mmc]: [0-63|64] 
+[55.897][mmc]: [0-63|64] 
+[55.899][mmc]: [0-14|15] [28-63|36] 
+[55.903][mmc]: ================== HSDDR52_DDR50...
+[55.907][mmc]: skip freq 400000
+[55.910][mmc]: freq: 1-25000000-64-4
+[56.163][mmc]: freq: 2-50000000-64-4
+[56.384][mmc]: [0-63|64] 
+[56.386][mmc]: [0-63|64] 
+[56.388][mmc]: ================== HS400...
+[56.392][mmc]: skip freq 400000
+[56.395][mmc]: skip freq 25000000
+[56.398][mmc]: freq: 2-50000000
+[56.414][mmc]: freq: 3-100000000
+[56.429][mmc]: freq: 4-150000000
+[56.443][mmc]: skip freq 200000000
+[56.446][mmc]: speed mode: HS400
+[56.449][mmc]: [0-63|64] 
+[56.451][mmc]: [0-63|64] 
+[56.454][mmc]: [0-18|19] [26-63|38] 
+[56.457][mmc]: skip freq 400000
+[56.460][mmc]: skip freq 25000000
+[56.463][mmc]: freq: 2-50000000-64-4
+[56.678][mmc]: freq: 3-100000000-64-4
+[56.792][mmc]: freq: 4-150000000-64-4
+[56.856][mmc]: skip freq 200000000
+[56.859][mmc]: [2-63|62] 
+[56.861][mmc]: [2-37|36] 
+[56.863][mmc]: [2-24|23] 
+[56.866][mmc]: DS26/SDR12: 0xffffffff 0xffffffff
+[56.870][mmc]: HSSDR52/SDR25: 0xff20ffff 0xffffffff
+[56.874][mmc]: HSDDR52/DDR50: 0xff2020ff 0xffffffff
+[56.879][mmc]: HS200/SDR104: 0x2020ffff 0xffffff2e
+[56.884][mmc]: HS400: 0x1421ffff 0xffffff0d
+[56.887][mmc]: HS400: 0x2020ffff 0xffffff2d
+[56.891][mmc]: Best spd md: 4-HS400, freq: 4-150000000, Bus width: 8
+[56.898]Loading Environment from SUNXI_FLASH... OK
+[56.902]try to burn key
+[56.904]out of usb burn from boot: not boot mode
+Hit any key to stop autoboot:  0 
+sunxi work mode=0x10
+run usb efex
+buf queue page size = 65536
+delay time 2500
+weak:otg_phy_config
+usb init ok
+set address 0x13
+set address 0x13 ok
+set address 0x13
+set address 0x13 ok
+set address 0x13
+set address 0x13 ok
+bootfile_mode=4
+flash sectors: 0x747c000
+SUNXI_EFEX_ERASE_TAG
+erase_flag = 0x0
+origin_erase_flag = 0x1
+FEX_CMD_fes_verify_status
+FEX_CMD_fes_verify last err=0
+the 0 mbr table is ok
+the 1 mbr table is ok
+the 2 mbr table is ok
+the 3 mbr table is ok
+*************MBR DUMP***************
+total mbr part 1
+
+part[0] name      :raw
+part[0] classname :DISK
+part[0] addrlo    :0xffff6000
+part[0] lenlo     :0x180000
+part[0] user_type :0
+part[0] keydata   :0
+part[0] ro        :0
+
+[60.502]erase all part start
+need erase flash: 0
+[60.506]read item0 copy0
+[60.515]Item0 (Map) magic is bad
+[60.518]the secure storage item0 copy0 magic is bad
+[60.530]Item0 (Map) magic is bad
+[60.533]the secure storage item0 copy1 magic is bad
+[60.537]Item0 (Map) magic is bad
+[60.540]the secure storage map is empty
+[60.544]no item name set-active-boot-slot in the map
+erase secure storage failed
+no part need to protect user data
+[60.554]erase all part start
+SUNXI_EFEX_MBR_TAG
+mbr size = 0x10000
+write primary GPT success
+write Backup GPT success
+[60.567]update partition map
+FEX_CMD_fes_verify_status
+FEX_CMD_fes_verify last err=0
+SUNXI_EFEX_BOOT0_TAG
+boot0 size = 0xc000
+[60.830][mmc]: write mmc 2 info ok
+storage type = 2
+FEX_CMD_fes_verify_status
+FEX_CMD_fes_verify last err=0
+******Has init
+FEX_CMD_fes_verify_value, start 0xffff6000, size high 0x0:low 0x30000000
+FEX_CMD_fes_verify_value 0xeed32a34
+
+U-Boot SPL 2026.07-dirty (Aug 27 2026 - 05:17:50 -0400)
+DRAM: 4096 MiB
+Trying to boot from MMC2
+LYNX_MMC_SAFE_CLOCK: mmc=2 f_max=25000000
+LYNX_MMC_HW_DIAG: mmc=2 cmd=8 arg=0x000001aa err=-110 blocks=0 blocksize=0 width=1 clock=400000 rint=0x00000100 status=0x00000506 gctrl=0x20000000 clkcr=0x00010000
+LYNX_MMC_HW_DIAG: mmc=2 cmd=55 arg=0x00000000 err=-110 blocks=0 blocksize=0 width=1 clock=400000 rint=0x00000100 status=0x00000506 gctrl=0x20000000 clkcr=0x00010000
+LYNX_MMC_FORCE_USER: mode=1 before_part_config=0x00 cached_hwpart=0
+LYNX_MMC_FORCE_USER: boot1_ret=0 cached_hwpart=1
+LYNX_MMC_FORCE_USER: user_ret=0 after_part_config=0x00 cached_hwpart=0
+LYNX_MMC_DIAG: mode=1 part=0 base=0x60 offset=0x10 final=0x70
+LYNX_MMC_DIAG: read sector=0x70 blksz=512
+NOTICE:  BL31: v2.12.0(debug):b5de74a68
+NOTICE:  BL31: Built : 06:25:11, Aug 26 2026
+NOTICE:  BL31: Detected Allwinner A523 SoC (1890)
+NOTICE:  BL31: Found U-Boot DTB at 0xa0ace78, model: Avaota A1
+INFO:    GICv3 without legacy support detected.
+INFO:    ARM GICv3 driver initialized in EL3
+INFO:    Maximum SPI INTID supported: 287
+INFO:    Configuring SPC Controller
+INFO:    BL31: Platform setup done
+INFO:    BL31: Initializing runtime services
+INFO:    BL31: cortex_a55: CPU workaround for erratum 1530923 was applied
+INFO:    PSCI: Suspend is unavailable
+INFO:    BL31: Preparing for EL3 exit to normal world
+INFO:    Entry point address = 0x4a000000
+INFO:    SPSR = 0x3c9
+
+
+U-Boot 2026.07-dirty (Aug 27 2026 - 05:17:50 -0400) Allwinner Technology
+
+CPU:   Allwinner A523 (SUN55I)
+Model: Avaota A1
+DRAM:  LYNX_RAM_TOP_SAFE: detected_top=0x140000000 usable_top=0x50000000
+4 GiB
+axp_regulator aldo1: 'regulator-name' has nonunique value: 'aldo1'
+sunxi_set_gate: (CLK#35) unhandled
+Core:  92 devices, 22 uclasses, devicetree: separate
+WDT:   Not starting watchdog@2050000
+MMC:   mmc@4020000: 0, mmc@4022000: 1
+Loading Environment from FAT... LYNX_MMC_HW_DIAG: mmc=2 cmd=8 arg=0x000001aa err=-110 blocks=0 blocksize=0 width=1 clock=400000 rint=0x00000100 status=0x00006506 gctrl=0x20000000 clkcr=0x00010000
+LYNX_MMC_HW_DIAG: mmc=2 cmd=55 arg=0x00000000 err=-110 blocks=0 blocksize=0 width=1 clock=400000 rint=0x00000100 status=0x00006506 gctrl=0x20000000 clkcr=0x00010000
+Unable to read "uboot.env" from mmc1:1... 
+In:    serial@2500000
+Out:   serial@2500000
+Err:   serial@2500000
+Net:   eth0: ethernet@4500000
+[2KHit any key to stop autoboot: 5[2KHit any key to stop autoboot: 4[2KHit any key to stop autoboot: 3[2KHit any key to stop autoboot: 2[2KHit any key to stop autoboot: 1[2KHit any key to stop autoboot: 0
+LYNX_MMC_HW_DIAG: mmc=2 cmd=8 arg=0x000001aa err=-110 blocks=0 blocksize=0 width=1 clock=400000 rint=0x00000100 status=0x00006506 gctrl=0xa0000000 clkcr=0x00010000
+LYNX_MMC_HW_DIAG: mmc=2 cmd=55 arg=0x00000000 err=-110 blocks=0 blocksize=0 width=1 clock=400000 rint=0x00000100 status=0x00006506 gctrl=0x20000000 clkcr=0x00010000
+switch to partitions #0, OK
+mmc1(part 0) is current device
+Scanning mmc 1:1...
+Found /extlinux/extlinux.conf
+Retrieving file: /extlinux/extlinux.conf
+Avaota A1 mainline boot
+1:	Linux 7.2 / Buildroot 2026.05.1
+Enter choice: 1:	Linux 7.2 / Buildroot 2026.05.1
+Retrieving file: /Image
+append: console=ttyS0,115200 earlycon root=/dev/mmcblk1p2 rootwait rw fsck.repair=yes net.ifnames=0
+Retrieving file: /sun55i-t527-avaota-a1.dtb
+Moving Image from 0x40080000 to 0x40200000, end=0x43350000
+## Flattened Device Tree blob at 4fa00000
+   Booting using the fdt blob at 0x4fa00000
+Working FDT set to 4fa00000
+   Loading Device Tree to 0000000049ff7000, end 0000000049ffff10 ... OK
+Working FDT set to 49ff7000
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x412fd050]
+[    0.000000] Linux version 7.2.0-avaota-a1-mainline (ubuntu@ubuntu2404) (aarch64-none-linux-gnu-gcc (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 10.3.1 20210621, GNU ld (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 2.36.1.20210621) #3 SMP PREEMPT Wed Aug 26 07:40:32 EDT 2026
+[    0.000000] KASLR disabled due to lack of seed
+[    0.000000] Machine model: Avaota A1
+[    0.000000] efi: UEFI not found.
+[    0.000000] earlycon: uart0 at MMIO32 0x0000000002500000 (options '115200n8')
+[    0.000000] printk: legacy bootconsole [uart0] enabled
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] NUMA: Faking a node at [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0x13f7d5840-0x13f7d7eff]
+[    0.000000] cma: Reserved 32 MiB at 0x00000000fe000000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: MIGRATE_INFO_TYPE not supported.
+[    0.000000] psci: SMC Calling Convention v1.5
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   [mem 0x0000000100000000-0x000000013fffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] percpu: Embedded 26 pages/cpu s67416 r8192 d30888 u106496
+[    0.000000] Detected VIPT I-cache on CPU0
+[    0.000000] CPU features: detected: GICv3 CPU interface
+[    0.000000] CPU features: detected: Virtualization Host Extensions
+[    0.000000] CPU features: detected: ARM errata 1165522, 1319367, or 1530923
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyS0,115200 earlycon root=/dev/mmcblk1p2 rootwait rw fsck.repair=yes net.ifnames=0
+[    0.000000] printk: log buffer data + meta data: 131072 + 458752 = 589824 bytes
+[    0.000000] Dentry cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] software IO TLB: area num 8.
+[    0.000000] software IO TLB: mapped [mem 0x00000000fa000000-0x00000000fe000000] (64MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 1048576
+[    0.000000] Policy zone: Normal
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=8, Nodes=1
+[    0.000000] rcu: Preemptible hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU event tracing is enabled.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=512 to nr_cpu_ids=8.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=8
+[    0.000000] RCU Tasks: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] GIC: enabling workaround for GICv3: non-coherent attribute
+[    0.000000] GICv3: GIC: Using split EOI/Deactivate mode
+[    0.000000] GICv3: 256 SPIs implemented
+[    0.000000] GICv3: 0 Extended SPIs implemented
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv3: GICv3 features: 16 PPIs
+[    0.000000] GICv3: GICD_CTLR.DS=0, SCR_EL3.FIQ=0
+[    0.000000] GICv3: CPU0: found redistributor 0 region 0:0x0000000003460000
+[    0.000000] ITS [mem 0x03440000-0x0345ffff]
+[    0.000000] GIC: enabling workaround for ITS: non-coherent attribute
+[    0.000000] ITS@0x0000000003440000: allocated 8192 Devices @1000a0000 (indirect, esz 8, psz 64K, shr 0)
+[    0.000000] ITS@0x0000000003440000: allocated 32768 Interrupt Collections @1000b0000 (flat, esz 2, psz 64K, shr 0)
+[    0.000000] ITS: using cache flushing for cmd queue
+[    0.000000] GICv3: using LPI property table @0x00000001000c0000
+[    0.000000] GIC: using cache flushing for LPI property table
+[    0.000000] GICv3: CPU0: using allocated LPI pending table @0x00000001000d0000
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.000000] arch_timer: cp15 timer running at 24.00MHz (hyp-virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns
+[    0.000001] sched_clock: 56 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns
+[    0.010115] Console: colour dummy device 80x25
+[    0.015080] Calibrating delay loop (skipped), value calculated using timer frequency.. 48.00 BogoMIPS (lpj=96000)
+[    0.026215] pid_max: default: 32768 minimum: 301
+[    0.031626] Mount-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.039783] Mountpoint-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.048728] VFS: Finished mounting rootfs on nullfs
+[    0.054720] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.063027] rcu: Hierarchical SRCU implementation.
+[    0.068307] rcu: 	Max phase no-delay instances is 1000.
+[    0.074406] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.085025] EFI services will not be available.
+[    0.090577] smp: Bringing up secondary CPUs ...
+[    0.096593] Detected VIPT I-cache on CPU1
+[    0.096668] GICv3: CPU1: found redistributor 100 region 0:0x0000000003480000
+[    0.096700] GICv3: CPU1: using allocated LPI pending table @0x00000001000e0000
+[    0.096762] CPU1: Booted secondary processor 0x0000000100 [0x412fd050]
+[    0.097845] Detected VIPT I-cache on CPU2
+[    0.097921] GICv3: CPU2: found redistributor 200 region 0:0x00000000034a0000
+[    0.097954] GICv3: CPU2: using allocated LPI pending table @0x00000001000f0000
+[    0.098014] CPU2: Booted secondary processor 0x0000000200 [0x412fd050]
+[    0.099051] Detected VIPT I-cache on CPU3
+[    0.099123] GICv3: CPU3: found redistributor 300 region 0:0x00000000034c0000
+[    0.099155] GICv3: CPU3: using allocated LPI pending table @0x0000000100100000
+[    0.099212] CPU3: Booted secondary processor 0x0000000300 [0x412fd050]
+[    0.100300] Detected VIPT I-cache on CPU4
+[    0.100372] GICv3: CPU4: found redistributor 400 region 0:0x00000000034e0000
+[    0.100404] GICv3: CPU4: using allocated LPI pending table @0x0000000100110000
+[    0.100459] CPU4: Booted secondary processor 0x0000000400 [0x412fd050]
+[    0.101463] Detected VIPT I-cache on CPU5
+[    0.101550] GICv3: CPU5: found redistributor 500 region 0:0x0000000003500000
+[    0.101583] GICv3: CPU5: using allocated LPI pending table @0x0000000100120000
+[    0.101640] CPU5: Booted secondary processor 0x0000000500 [0x412fd050]
+[    0.102698] Detected VIPT I-cache on CPU6
+[    0.102782] GICv3: CPU6: found redistributor 600 region 0:0x0000000003520000
+[    0.102814] GICv3: CPU6: using allocated LPI pending table @0x0000000100130000
+[    0.102867] CPU6: Booted secondary processor 0x0000000600 [0x412fd050]
+[    0.103860] Detected VIPT I-cache on CPU7
+[    0.103945] GICv3: CPU7: found redistributor 700 region 0:0x0000000003540000
+[    0.103977] GICv3: CPU7: using allocated LPI pending table @0x0000000100140000
+[    0.104031] CPU7: Booted secondary processor 0x0000000700 [0x412fd050]
+[    0.104218] smp: Brought up 1 node, 8 CPUs
+[    0.297097] SMP: Total of 8 processors activated.
+[    0.302123] CPU: All CPU(s) started at EL2
+[    0.306660] CPU features: detected: 32-bit EL0 Support
+[    0.312317] CPU features: detected: 32-bit EL1 Support
+[    0.317995] CPU features: detected: Data cache clean to the PoU not required for I/D coherence
+[    0.327223] CPU features: detected: Common not Private translations
+[    0.334113] CPU features: detected: CRC32 instructions
+[    0.339768] CPU features: detected: RCpc load-acquire (LDAPR)
+[    0.346085] CPU features: detected: LSE atomic instructions
+[    0.352176] CPU features: detected: Privileged Access Never
+[    0.358275] CPU features: detected: PMUv3
+[    0.362684] CPU features: detected: RAS Extension Support
+[    0.368622] CPU features: detected: XNX
+[    0.372739] CPU features: detected: Speculative Store Bypassing Safe (SSBS)
+[    0.380419] alternatives: applying system-wide alternatives
+[    0.390633] CPU features: detected: ICV_DIR_EL1 trapping
+[    0.397483] Memory: 3958572K/4194304K available (17216K kernel code, 5250K rwdata, 14280K rodata, 12736K init, 696K bss, 197788K reserved, 32768K cma-reserved)
+[    0.414740] devtmpfs: initialized
+[    0.428134] posixtimers hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.436024] futex hash table entries: 2048 (131072 bytes on 1 NUMA nodes, total 128 KiB, linear).
+[    0.446159] 20144 pages in range for non-PLT usage
+[    0.446169] 511664 pages in range for PLT usage
+[    0.456051] DMI: not present or invalid.
+[    0.469671] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.477219] DMA: preallocated 512 KiB GFP_KERNEL pool for atomic allocations
+[    0.485167] DMA: preallocated 512 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.493652] audit: initializing netlink subsys (disabled)
+[    0.499681] audit: type=2000 audit(0.304:1): state=initialized audit_enabled=0 res=1
+[    0.502268] thermal_sys: Registered thermal governor 'step_wise'
+[    0.508215] thermal_sys: Registered thermal governor 'power_allocator'
+[    0.514953] cpuidle: using governor menu
+[    0.526669] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.534347] ASID allocator initialised with 65536 entries
+[    0.546654] Serial: AMBA PL011 UART driver
+[    0.557024] /soc/clock-controller@2001000: Fixed dependency cycle(s) with /soc/rtc@7090000
+[    0.566127] /soc/interrupt-controller@3400000: Fixed dependency cycle(s) with /soc/interrupt-controller@3400000
+[    0.577653] /soc/clock-controller@7010000: Fixed dependency cycle(s) with /soc/clock-controller@2001000
+[    0.587816] /soc/clock-controller@7010000: Fixed dependency cycle(s) with /soc/rtc@7090000
+[    0.597014] /soc/rtc@7090000: Fixed dependency cycle(s) with /soc/clock-controller@7010000
+[    0.608500] /soc/clock-controller@2001000: Fixed dependency cycle(s) with /soc/rtc@7090000
+[    0.633212] /soc/clock-controller@7010000: Fixed dependency cycle(s) with /soc/clock-controller@2001000
+[    0.643398] /soc/clock-controller@7010000: Fixed dependency cycle(s) with /soc/rtc@7090000
+[    0.654553] /soc/i2c@7081400: Fixed dependency cycle(s) with /soc/pinctrl@7022000/r-i2c-pins
+[    0.664868] /soc/clock-controller@7010000: Fixed dependency cycle(s) with /soc/rtc@7090000
+[    0.674079] /soc/clock-controller@2001000: Fixed dependency cycle(s) with /soc/rtc@7090000
+[    0.683340] /soc/rtc@7090000: Fixed dependency cycle(s) with /soc/clock-controller@7010000
+[    0.699458] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.706894] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.713789] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.721250] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.728038] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.735467] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.742081] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.749394] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.759449] ACPI: Interpreter disabled.
+[    0.769926] iommu: Default domain type: Translated
+[    0.775213] iommu: DMA domain TLB invalidation policy: strict mode
+[    0.782894] SCSI subsystem initialized
+[    0.787411] usbcore: registered new interface driver usbfs
+[    0.793326] usbcore: registered new interface driver hub
+[    0.799112] usbcore: registered new device driver usb
+[    0.806243] pps_core: LinuxPPS API ver. 1 registered
+[    
+0.811713] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.821705] PTP clock support registered
+[    0.826281] EDAC MC: Ver: 3.0.0
+[    0.830383] scmi_core: SCMI protocol bus registered
+[    0.837545] FPGA manager framework
+[    0.842825] vgaarb: loaded
+[    0.846386] clocksource: Switched to clocksource arch_sys_counter
+[    0.853308] VFS: Disk quotas dquot_6.6.0
+[    0.857635] VFS: Dquot-cache hash table entries: 512 (4096 bytes)
+[    0.864791] pnp: PnP ACPI: disabled
+[    0.879713] NET: Registered PF_INET protocol family
+[    0.885275] IP idents hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.897225] tcp_listen_portaddr_hash hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    0.906657] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.915193] TCP established hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.924156] TCP bind hash table entries: 32768 (order: 8, 1048576 bytes, linear)
+[    0.933152] TCP: Hash tables configured (established 32768 bind 32768)
+[    0.940300] UDP hash table entries: 2048 (order: 5, 131072 bytes, linear)
+[    0.948067] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.954936] RPC: Registered named UNIX socket transport module.
+[    0.961466] RPC: Registered udp transport module.
+[    0.966540] RPC: Registered tcp transport module.
+[    0.971663] RPC: Registered tcp-with-tls transport module.
+[    0.977696] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.984788] PCI: CLS 0 bytes, default 64
+[    0.993926] kvm [1]: nv: 570 coarse grained trap handlers
+[    1.000161] kvm [1]: nv: 710 fine grained trap handlers
+[    1.006435] kvm [1]: IPA Size Limit: 40 bits
+[    1.011162] kvm [1]: GICv3: no GICV resource entry
+[    1.016439] kvm [1]: disabling GICv2 emulation
+[    1.021373] kvm [1]: GIC system register CPU interface enabled
+[    1.027505] kvm [1]: vgic interrupt IRQ9
+[    1.031896] kvm [1]: VHE mode initialized successfully
+[    1.040026] Initialise system trusted keyrings
+[    1.045211] workingset: timestamp_bits=42 (anon: 37) max_order=20 bucket_order=0 (anon: 0)
+[    1.054825] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    1.061707] NFS: Registering the id_resolver key type
+[    1.067304] Key type id_resolver registered
+[    1.071861] Key type id_legacy registered
+[    1.076314] nfs4filelayout_init: NFSv4 File Layout Driver Registering...
+[    1.083448] nfs4flexfilelayout_init: NFSv4 Flexfile Layout Driver Registering...
+[    1.092113] Key type asymmetric registered
+[    1.096643] Asymmetric key parser 'x509' registered
+[    1.102101] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 243)
+[    1.110063] io scheduler mq-deadline registered
+[    1.114769] io scheduler kyber registered
+[    1.119231] io scheduler bfq registered
+[    1.151401] ledtrig-cpu: registered to indicate activity on CPUs
+[    1.247220] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[    1.261907] msm_serial: driver initialized
+[    1.267660] SuperH (H)SCI(F) driver initialized
+[    1.273085] STM32 USART driver initialized
+[    1.294769] loop: module loaded
+[    1.300728] megasas: 07.734.00.00-rc1
+[    1.318661] tun: Universal TUN/TAP device driver, 1.6
+[    1.324837] VFIO - User Level meta-driver version: 0.3
+[    1.339931] usbcore: registered new interface driver usb-storage
+[    1.356074] sun6i-rtc 7090000.rtc: registered as rtc0
+[    1.361539] sun6i-rtc 7090000.rtc: setting system clock to 1970-01-02T00:00:09 UTC (86409)
+[    1.371637] i2c_dev: i2c /dev entries driver
+[    1.410274] SMCCC: SOC_ID: ID = jep106:091e:1890 Revision = 0x00000003
+[    1.420094] usbcore: registered new interface driver usbh
+id
+[   
+ 1.426163] usbhid: USB HID core driver
+[    1.439523] hw perfevents: enabled with armv8_cortex_a55 PMU driver, 7 (0,8000003f) counters available
+[    1.463302] NET: Registered PF_INET6 protocol family
+[    1.469906] Segment Routing with IPv6
+[    1.474023] In-situ OAM (IOAM) with IPv6
+[    1.478460] NET: Registered PF_PACKET protocol family
+[    
+
+
+
+icates
+[    1.559939] Demotion targets for Node 0: null
+[    1.5871
+00] gpio gpiochip0: Static allocation of GPIO base is deprecated, use
+ dynamic allocation.
+[    1.599833] sun55i-a523-r-pinctrl 7022000.pi
+nctrl: initialized sunXi PIO driver
+[    1.640609] sun55i-a523-r-pin
+ctrl 7022000.pinctrl: supply vcc-pl not found, using dummy regulator
+
+[    1.651784] axp20x-i2c 0-0035: AXP20x variant AXP717 found
+[    
+1.668155] platform axp717-adc: DMA mask not set
+[    1.676239] platf
+orm axp20x-usb-power-supply: DMA mask not set
+[    1.676501] vcc-cvp
+-pk-vid1v8: Bringing 2800000uV into 1800000-1800000uV
+[    1.685311]
+ axp20x-i2c 0-0035: AXP20X driver loaded
+[    1.692276] vcc-efuse: B
+ringing 3300000uV into 1800000-1800000uV
+[    1.696187] axp20x-i2c 0
+-0036: AXP20x variant AXP323 found
+[    1.711498] axp20x-i2c 0-0036:
+ AXP20X driver loaded
+[    1.733766] gpio gpiochip1: Static allocati
+on of GPIO base is deprecated, use dynamic allocation.
+[    1.758309
+] sun55i-a523-pinctrl 2000000.pinctrl: initialized sunXi PIO driver
+
+[    1.768984] printk: legacy console [ttyS0] disabled
+[    1.795088
+] 2500000.serial: ttyS0 at MMIO 0x2500000 (irq = 463, base_baud = 150
+0000) is a 16550A
+[    1.804782] printk: legacy console [ttyS0] enab
+led
+[    1.804782] printk: legacy console [ttyS0] enabled
+[    1.81
+4882] printk: legacy bootconsole [uart0] disabled
+[    1.814882] pri
+ntk: legacy bootconsole [uart0] disabled
+[    1.861526] sunxi-mmc 40
+20000.mmc: Got CD GPIO
+[    1.891798] sunxi-mmc 4020000.mmc: initial
+ized, max. request size: 2048 KB, uses new timings mode
+[    1.89180
+7] sunxi-mmc 4022000.mmc: initialized, max. request size: 2048 KB, us
+es new timings mode
+[    1.904173] phy phy-4100400.phy.0: Changing d
+r_mode to 1
+[    1.908817] ehci-platform 4200000.usb: EHCI Host Cont
+roller
+[    1.908845] ehci-platform 4200000.usb: new USB bus registe
+red, assigned bus number 1
+[    1.908996] ehci-platform 4200000.usb:
+ irq 468, io mem 0x04200000
+[    1.918291] ohci-platform 4200400.usb
+: Generic Platform OHCI controller
+[    1.918450] ehci-platform 4200
+000.usb: USB 2.0 started, EHCI 1.00
+[    1.918635] usb_phy_generic u
+sb_phy_generic.1.auto: dummy supplies not allowed for exclusive reque
+sts (id=vbus)
+[    1.919423] hub 1-0:1.0: USB hub found
+[    1.9194
+64] hub 1-0:1.0: 1 port detected
+[    1.920637] phy phy-4100400.phy.
+0: External vbus detected, not enabling our own vbus
+[    1.928312] 
+ohci-platform 4200400.usb: new USB bus registered, assigned bus numbe
+r 2
+[    1.934401] ohci-platform 4101400.usb: Generic Platform OHCI 
+controller
+[    1.939547] clk: Disabling unused clocks
+[    1.93978
+5] PM: genpd: Disabling unused power domains
+[    1.941126] ohci-pla
+tform 4200400.usb: irq 470, io mem 0x04200400
+[    1.947128] ohci-pl
+atform 4101400.usb: new USB bus registered, assigned bus number 3
+[ 
+   2.009967] ohci-platform 4101400.usb: irq 469, io mem 0x04101400
+[
+    2.015310] hub 2-0:1.0: USB hub found
+[    2.019880] hub 2-0:1.0:
+ 1 port detected
+[    2.075201] hub 3-0:1.0: USB hub found
+[    2.0
+79028] hub 3-0:1.0: 1 port detected
+[    2.305200] mmc1: new HS200 M
+MC card at address 0001
+[    2.311116] mmcblk1: mmc1:0001 CJNB4R 58.
+2 GiB
+[    2.318131]  mmcblk1: p1 p2
+[    2.321766] mmcblk1boot0: m
+mc1:0001 CJNB4R 4.00 MiB
+[    2.329306] mmcblk1boot1: mmc1:0001 CJNB
+4R 4.00 MiB
+[    2.938451] ehci-platform 4101000.usb: EHCI Host Cont
+roller
+[    2.944176] ehci-platform 4101000.usb: new USB bus registe
+red, assigned bus number 4
+[    2.952058] ehci-platform 4101000.usb:
+ irq 467, io mem 0x04101000
+[    2.966412] ehci-platform 4101000.usb
+: USB 2.0 started, EHCI 1.00
+[    2.973328] hub 4-0:1.0: USB hub fou
+nd
+[    2.977153] hub 4-0:1.0: 1 port detected
+[    3.008629] EXT4-
+fs (mmcblk1p2): mounted filesystem cd55d00b-ea80-488b-a005-a7ef059293
+90 r/w with ordered data mode. Quota mode: none.
+[    3.020829] VFS:
+ Mounted root (ext4 filesystem) on device 179:2.
+[    3.027808] devt
+mpfs: mounted
+[    3.031001] VFS: Pivoted into new rootfs
+[    3.04
+1245] Freeing unused kernel memory: 12736K
+[    3.046189] Run /sbin/
+init as init process
+[    3.206438] EXT4-fs (mmcblk1p2): re-mounted 
+cd55d00b-ea80-488b-a005-a7ef05929390.
+Saving 256 bits of non-credita
+ble seed for next boot
+Starting syslogd: OK
+Starting klogd: OK
+Run
+ning sysctl: OK
+Starting udevd: OK
+[    3.377969] udevd[147]: start
+ing version 3.2.14
+[    4.546415] random: crng init done
+[    4.571
+639] udevd[147]: starting eudev-3.2.14
+[    5.180898] sunxi-wdt 2050
+000.watchdog: Watchdog enabled (timeout=16 sec, nowayout=0)
+[    5.2
+84101] etnaviv etnaviv: bound 7122000.npu (ops gpu_ops [etnaviv])
+[ 
+   5.290947] etnaviv-gpu 7122000.npu: model: GC9000, revision: 9003
+
+[    5.313662] panfrost 1800000.gpu: clock rate = 432000000
+[    5.3
+14472] [drm] Initialized etnaviv 1.4.0 for etnaviv on minor 0
+[    5
+.319071] panfrost 1800000.gpu: bus_clock rate = 200000000
+[    5.331
+328] panfrost 1800000.gpu: mali-g57 id 0x9091 major 0x0 minor 0x1 sta
+tus 0x0
+[    5.339058] panfrost 1800000.gpu: features: 00000000,0000
+19f7, issues: 00000001,80000400
+[    5.347176] panfrost 1800000.gpu:
+ Features: L2:0x07110206 Shader:0x00000000 Tiler:0x00000809 Mem:0x1 M
+MU:0x00002830 AS:0xff JS:0x7
+[    5.358940] panfrost 1800000.gpu: sh
+ader_present=0x1 l2_present=0x1
+[    5.366729] panfrost 1800000.gpu:
+ [drm] Using Transparent Hugepage
+[    5.367248] dwmac-sun55i 451000
+0.ethernet: IRQ eth_wake_irq not found
+[    5.367640] dwmac-sun8i 45
+00000.ethernet: IRQ eth_wake_irq not found
+[    5.367656] dwmac-sun8
+i 4500000.ethernet: IRQ sfty not found
+[    5.367991] dwmac-sun8i 45
+00000.ethernet: PTP uses main clock
+[    5.368291] dwmac-sun8i 45000
+00.ethernet: No HW DMA feature register supported
+[    5.368302] dwm
+ac-sun8i 4500000.ethernet: RX Checksum Offload Engine supported
+[   
+ 5.368311] dwmac-sun8i 4500000.ethernet: COE Type 2
+[    5.368319] d
+wmac-sun8i 4500000.ethernet: TX Checksum insertion supported
+[    5.
+368327] dwmac-sun8i 4500000.ethernet: Normal descriptors
+[    5.3683
+34] dwmac-sun8i 4500000.ethernet: Chain mode enabled
+[    5.373473] 
+[drm] Initialized panfrost 1.6.0 for 1800000.gpu on minor 1
+[    5.3
+79419] dwmac-sun55i 4510000.ethernet: IRQ sfty not found
+[    5.3796
+06] dwmac-sun55i 4510000.ethernet: PTP uses main clock
+[    5.453549
+] dwmac-sun55i 4510000.ethernet: User ID: 0x20, Synopsys ID: 0x52
+[ 
+   5.460575] dwmac-sun55i 4510000.ethernet: 	DWMAC4/5
+[    5.465573]
+ dwmac-sun55i 4510000.ethernet: DMA HW capability register supported
+
+[    5.472904] dwmac-sun55i 4510000.ethernet: Active PHY interface: 
+RGMII (1)
+[    5.479800] dwmac-sun55i 4510000.ethernet: RX Checksum 
+Offload Engine supported
+[    5.487125] dwmac-sun55i 4510000.etherne
+t: TX Checksum insertion supported
+[    5.494014] dwmac-sun55i 45100
+00.ethernet: Enable RX Mitigation via HW Watchdog Timer
+[    5.50186
+1] dwmac-sun55i 4510000.ethernet: Enabled RFS Flow TC (entries=10)
+[
+    5.508839] dwmac-sun55i 4510000.ethernet: Using 32/40 bits DMA hos
+t/device width
+[    5.709948] spi-nand spi0.0: probe with driver spi
+-nand failed with error -110
+Starting network: Waiting for interface
+ eth0,eth1 to appear............... timeout!
+run-parts: /etc/network
+/if-pre-up.d/wait_iface: exit status 1
+FAIL
+Starting crond: OK
+Sta
+rting dropbear sshd: OK
+[   21.127826] configfs-gadget.avaota_a1 gad
+get.0: HOST MAC 02:00:00:52:70:02
+[   21.134775] configfs-gadget.ava
+ota_a1 gadget.0: MAC 02:00:00:52:70:01
+
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2026.05.1
+avaota-a1 login: 
+Avaota A1 mainline Linux /
+ Buildroot 2
+026.
+
+a
+a-a1
+in: 

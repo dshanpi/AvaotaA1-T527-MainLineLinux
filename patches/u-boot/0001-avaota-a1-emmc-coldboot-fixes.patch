@@ -1,0 +1,170 @@
+diff --git a/arch/arm/mach-sunxi/board.c b/arch/arm/mach-sunxi/board.c
+index 432b1c10..e589db51 100644
+--- a/arch/arm/mach-sunxi/board.c
++++ b/arch/arm/mach-sunxi/board.c
+@@ -69,6 +69,19 @@ struct mm_region *mem_map = sunxi_mem_map;
+ 
+ phys_addr_t board_get_usable_ram_top(phys_size_t total_size)
+ {
++	/*
++	 * The A523/T527 can report DRAM spanning the 4 GiB boundary.  Relocating
++	 * U-Boot immediately below 0x1_0000_0000 is not reliable on Avaota A1:
++	 * relocated command text becomes zero/corrupt and triggers synchronous
++	 * aborts.  Keep U-Boot itself in the first 256 MiB of DRAM while retaining
++	 * the full gd->ram_size for the OS device tree and Linux.
++	 */
++	if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) && gd->ram_top > 0x50000000ULL) {
++		printf("LYNX_RAM_TOP_SAFE: detected_top=0x%llx usable_top=0x50000000\n",
++		       (unsigned long long)gd->ram_top);
++		return 0x50000000ULL;
++	}
++
+ 	/* Some devices (like the EMAC) have a 32-bit DMA limit. */
+ 	if (gd->ram_top > (1ULL << 32))
+ 		return 1ULL << 32;
+diff --git a/common/spl/spl_mmc.c b/common/spl/spl_mmc.c
+index cc16709d..8e8a7af5 100644
+--- a/common/spl/spl_mmc.c
++++ b/common/spl/spl_mmc.c
+@@ -45,9 +45,12 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
+ 	struct blk_desc *bd = mmc_get_blk_desc(mmc);
+ 	struct spl_load_info load;
+ 
++	printf("LYNX_MMC_DIAG: read sector=0x%lx blksz=%lu\n",
++	       sector, bd->blksz);
+ 	spl_load_init(&load, h_spl_load_read, bd, bd->blksz);
+ 	ret = spl_load(spl_image, bootdev, &load, 0, sector << bd->log2blksz);
+ 	if (ret) {
++		printf("LYNX_MMC_DIAG: raw/FIT load failed ret=%d\n", ret);
+ 		puts("mmc_load_image_raw_sector: mmc block read error\n");
+ 		log_debug("(error=%d)\n", ret);
+ 		return ret;
+@@ -413,6 +416,31 @@ int spl_mmc_load(struct spl_image_info *spl_image,
+ 	case MMCSD_MODE_RAW:
+ 		debug("spl: mmc boot mode: raw\n");
+ 
++		/*
++		 * A523/T527 reports raw boot mode even when BootROM fetched SPL from
++		 * eMMC Boot0.  The controller still accesses Boot0, but the legacy
++		 * block descriptor is cached as hwpart 0.  A no-op CMD6 value of zero
++		 * does not clear the controller/card boot-access state reliably, so
++		 * force a real Boot1 -> user transition before every raw FIT read.
++		 */
++		if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) && IS_MMC(mmc)) {
++			printf("LYNX_MMC_FORCE_USER: mode=%u before_part_config=0x%02x cached_hwpart=%u\n",
++			       boot_mode, mmc->part_config,
++			       mmc_get_blk_desc(mmc)->hwpart);
++			ret = mmc_switch_part(mmc, EMMC_HWPART_BOOT1);
++			printf("LYNX_MMC_FORCE_USER: boot1_ret=%d cached_hwpart=%u\n",
++			       ret, mmc_get_blk_desc(mmc)->hwpart);
++			if (ret)
++				return ret;
++			ret = mmc_switch_part(mmc, EMMC_HWPART_DEFAULT);
++			printf("LYNX_MMC_FORCE_USER: user_ret=%d after_part_config=0x%02x cached_hwpart=%u\n",
++			       ret, mmc->part_config,
++			       mmc_get_blk_desc(mmc)->hwpart);
++			if (ret)
++				return ret;
++			part = EMMC_HWPART_DEFAULT;
++		}
++
+ 		if (!spl_start_uboot()) {
+ 			ret = mmc_load_image_raw_os(spl_image, bootdev, mmc);
+ 			if (!ret)
+@@ -424,6 +452,10 @@ int spl_mmc_load(struct spl_image_info *spl_image,
+ 		raw_sect = spl_mmc_get_uboot_raw_sector(mmc, raw_sect);
+ 
+ #ifdef CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR
++		printf("LYNX_MMC_DIAG: mode=%u part=%d base=0x%lx offset=0x%lx final=0x%lx\n",
++		       boot_mode, part, raw_sect,
++		       spl_mmc_raw_uboot_offset(part),
++		       raw_sect + spl_mmc_raw_uboot_offset(part));
+ 		ret = mmc_load_image_raw_sector(spl_image, bootdev, mmc,
+ 						raw_sect +
+ 						spl_mmc_raw_uboot_offset(part));
+diff --git a/configs/avaota-a1_defconfig b/configs/avaota-a1_defconfig
+index a1f89927..1d1e49ac 100644
+--- a/configs/avaota-a1_defconfig
++++ b/configs/avaota-a1_defconfig
+@@ -1,7 +1,10 @@
+ CONFIG_ARM=y
++CONFIG_EXPERT=y
++CONFIG_SKIP_RELOCATE=y
+ CONFIG_ARCH_SUNXI=y
+ CONFIG_DEFAULT_DEVICE_TREE="allwinner/sun55i-t527-avaota-a1"
+ CONFIG_SPL=y
++CONFIG_SPL_FIT_PRINT=y
+ CONFIG_DRAM_SUNXI_DX_ODT=0x07070707
+ CONFIG_DRAM_SUNXI_DX_DRI=0x0d0d0d0d
+ CONFIG_DRAM_SUNXI_CA_DRI=0x0e0e
+@@ -22,6 +25,8 @@ CONFIG_SYS_I2C_MVTWSI=y
+ CONFIG_SYS_I2C_SLAVE=0x7f
+ CONFIG_SYS_I2C_SPEED=400000
+ CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_BOOTDELAY=5
++CONFIG_PREBOOT=""
+ CONFIG_SUN8I_EMAC=y
+ CONFIG_PHY_REALTEK=y
+ CONFIG_REGULATOR_AXP=y
+@@ -31,3 +36,4 @@ CONFIG_AXP_DCDC2_VOLT=920
+ CONFIG_AXP_DCDC3_VOLT=1160
+ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_OHCI_HCD=y
++# CONFIG_USB_KEYBOARD is not set
+diff --git a/drivers/mmc/sunxi_mmc.c b/drivers/mmc/sunxi_mmc.c
+index e28c81af..a7f1c934 100644
+--- a/drivers/mmc/sunxi_mmc.c
++++ b/drivers/mmc/sunxi_mmc.c
+@@ -456,6 +456,14 @@ static int sunxi_mmc_send_cmd_common(struct sunxi_mmc_priv *priv,
+ 	}
+ out:
+ 	if (error < 0) {
++		printf("LYNX_MMC_HW_DIAG: mmc=%u cmd=%u arg=0x%08x err=%d "
++		       "blocks=%u blocksize=%u width=%u clock=%u "
++		       "rint=0x%08x status=0x%08x gctrl=0x%08x clkcr=0x%08x\n",
++		       priv->mmc_no, cmd->cmdidx, cmd->cmdarg, error,
++		       data ? data->blocks : 0, data ? data->blocksize : 0,
++		       mmc->bus_width, mmc->clock,
++		       readl(&priv->reg->rint), readl(&priv->reg->status),
++		       readl(&priv->reg->gctrl), readl(&priv->reg->clkcr));
+ 		writel(SUNXI_MMC_GCTRL_RESET, &priv->reg->gctrl);
+ 		mmc_update_clk(priv);
+ 	}
+@@ -584,7 +592,18 @@ struct mmc *sunxi_mmc_init(int sdc_no)
+ 	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
+ 
+ 	cfg->f_min = 400000;
+-	cfg->f_max = 52000000;
++	if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) && sdc_no == 2) {
++		/*
++		 * MMC2 data reads show CRC errors at 52 MHz on Avaota A1 before
++		 * the A523 sampling delay is tuned.  SPL has no device tree, so
++		 * the board's max-frequency property cannot constrain this path.
++		 */
++		cfg->f_max = 25000000;
++		printf("LYNX_MMC_SAFE_CLOCK: mmc=%d f_max=%u\n",
++		       sdc_no, cfg->f_max);
++	} else {
++		cfg->f_max = 52000000;
++	}
+ 
+ 	if (mmc_resource_init(sdc_no) != 0)
+ 		return NULL;
+diff --git a/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts b/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
+index 054d0357..6db88272 100644
+--- a/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
++++ b/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
+@@ -129,8 +129,11 @@
+ &mmc2 {
+ 	bus-width = <8>;
+ 	cap-mmc-hw-reset;
+-	mmc-ddr-1_8v;
+-	mmc-hs200-1_8v;
++	/*
++	 * Keep SPL eMMC reads in the conservative timing range until the
++	 * A523/T527 MMC2 sampling delay is validated on this board.
++	 */
++	max-frequency = <25000000>;
+ 	non-removable;
+ 	vmmc-supply = <&reg_cldo3>;
+ 	vqmmc-supply = <&reg_cldo1>;
