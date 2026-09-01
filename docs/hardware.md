@@ -11,10 +11,10 @@
 | eMMC boot areas | `/dev/mmcblk1boot0`, `/dev/mmcblk1boot1`, 4 MiB each |
 | Root filesystem | eMMC user partition 2, ext4 |
 
-The Linux device tree marks MMC2 non-removable, excludes SD/SDIO probing and
-temporarily limits the bus to 25 MHz. Linux later negotiates HS200 successfully.
-The conservative ceiling is intentional until the T527 MMC2 sampling delay is
-characterized across boards and temperatures.
+The v6 Linux device tree marks MMC2 non-removable, excludes SD/SDIO probing,
+forces a 4-bit bus, limits it to 25 MHz and removes HS200/DDR capabilities.
+This conservative SDR-only profile avoids the observed 8-bit data CRC failures
+until the T527 MMC2 sampling delay is characterized across boards and temperatures.
 
 Do not infer Linux block numbering from the U-Boot device number. On the
 verified board U-Boot scans `mmc 1`, while Linux exposes the same eMMC as

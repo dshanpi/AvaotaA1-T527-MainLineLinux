@@ -1,4 +1,4 @@
-.PHONY: bootstrap check build verify package clean
+.PHONY: bootstrap check build loader verify-loader verify package clean
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -8,6 +8,12 @@ check:
 
 build:
 	./scripts/build.sh
+
+loader:
+	./scripts/build-loader.sh
+
+verify-loader:
+	./scripts/verify-loader.sh
 
 verify:
 	./scripts/verify-artifacts.sh

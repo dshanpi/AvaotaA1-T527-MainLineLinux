@@ -1,5 +1,5 @@
 diff --git a/arch/arm/mach-sunxi/board.c b/arch/arm/mach-sunxi/board.c
-index 432b1c10..e589db51 100644
+index 432b1c10f92c294f36bcc5a3f252984686da2bea..e589db518c11e031853533c74376eb7b6ac4c7c1 100644
 --- a/arch/arm/mach-sunxi/board.c
 +++ b/arch/arm/mach-sunxi/board.c
 @@ -69,6 +69,19 @@ struct mm_region *mem_map = sunxi_mem_map;
@@ -23,7 +23,7 @@ index 432b1c10..e589db51 100644
  	if (gd->ram_top > (1ULL << 32))
  		return 1ULL << 32;
 diff --git a/common/spl/spl_mmc.c b/common/spl/spl_mmc.c
-index cc16709d..8e8a7af5 100644
+index cc16709dc9b1bc29e1de78cde7ff6af12780d914..8e8a7af5f252c39cd9850ff05852f5851c0b479f 100644
 --- a/common/spl/spl_mmc.c
 +++ b/common/spl/spl_mmc.c
 @@ -45,9 +45,12 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
@@ -83,7 +83,7 @@ index cc16709d..8e8a7af5 100644
  						raw_sect +
  						spl_mmc_raw_uboot_offset(part));
 diff --git a/configs/avaota-a1_defconfig b/configs/avaota-a1_defconfig
-index a1f89927..1d1e49ac 100644
+index a1f89927f5e1fa831fda1dec4ad668e55c8ff685..1d1e49ac72774d4d9183076cbcabd4b801f3f1c9 100644
 --- a/configs/avaota-a1_defconfig
 +++ b/configs/avaota-a1_defconfig
 @@ -1,7 +1,10 @@
@@ -111,11 +111,53 @@ index a1f89927..1d1e49ac 100644
  CONFIG_USB_EHCI_HCD=y
  CONFIG_USB_OHCI_HCD=y
 +# CONFIG_USB_KEYBOARD is not set
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index 2e565560656422b99a4dd999d11ce7998bb06088..11b1538f9f4d86ba364f2acbd9775dea37254a39 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -551,9 +551,23 @@ ulong mmc_bread(struct blk_desc *block_dev, lbaint_t start, lbaint_t blkcnt,
+ 	do {
+ 		cur = (blocks_todo > b_max) ? b_max : blocks_todo;
+ 		if (mmc_read_blocks(mmc, dst, start, cur) != cur) {
++			/*
++			 * The A523 MMC2 controller is reset by its driver after a data
++			 * timeout.  Retry the same small request once after that reset;
++			 * never loop indefinitely or mask a persistent media failure.
++			 */
++			if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) && b_max == 128) {
++#if !defined(CONFIG_XPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
++				printf("LYNX_MMC_READ_RETRY: start=0x" LBAF
++				       " blocks=0x" LBAF "\n", start, cur);
++#endif
++				if (mmc_read_blocks(mmc, dst, start, cur) == cur)
++					goto read_ok;
++			}
+ 			pr_debug("%s: Failed to read blocks\n", __func__);
+ 			return 0;
+ 		}
++	read_ok:
+ 		blocks_todo -= cur;
+ 		start += cur;
+ 		dst += cur * mmc->read_bl_len;
 diff --git a/drivers/mmc/sunxi_mmc.c b/drivers/mmc/sunxi_mmc.c
-index e28c81af..a7f1c934 100644
+index e28c81afffec1ac47b31a3d309d78979407c74e2..263f3b803558d9fc3b2f99136e38d68e60138e2e 100644
 --- a/drivers/mmc/sunxi_mmc.c
 +++ b/drivers/mmc/sunxi_mmc.c
-@@ -456,6 +456,14 @@ static int sunxi_mmc_send_cmd_common(struct sunxi_mmc_priv *priv,
+@@ -259,6 +259,13 @@ static int sunxi_mmc_set_ios_common(struct sunxi_mmc_priv *priv,
+ 	else
+ 		writel(0x0, &priv->reg->width);
+ 
++	if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) && priv->mmc_no == 2)
++		printf("LYNX_MMC_IOS: mmc=%u width=%u clock=%u mclk=0x%08x "
++		       "ntsr=0x%08x samp_dl=0x%08x width_reg=0x%08x\n",
++		       priv->mmc_no, mmc->bus_width, mmc->clock,
++		       readl(priv->mclkreg), readl(&priv->reg->ntsr),
++		       readl(&priv->reg->samp_dl), readl(&priv->reg->width));
++
+ 	return 0;
+ }
+ 
+@@ -456,6 +463,14 @@ static int sunxi_mmc_send_cmd_common(struct sunxi_mmc_priv *priv,
  	}
  out:
  	if (error < 0) {
@@ -130,7 +172,19 @@ index e28c81af..a7f1c934 100644
  		writel(SUNXI_MMC_GCTRL_RESET, &priv->reg->gctrl);
  		mmc_update_clk(priv);
  	}
-@@ -584,7 +592,18 @@ struct mmc *sunxi_mmc_init(int sdc_no)
+@@ -577,14 +592,31 @@ struct mmc *sunxi_mmc_init(int sdc_no)
+ 
+ 	if ((IS_ENABLED(CONFIG_MACH_SUN50I) || IS_ENABLED(CONFIG_MACH_SUN8I) ||
+ 	    IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_MACH_SUN55I_A523)) &&
+-	    (sdc_no == 2))
+-		cfg->host_caps = MMC_MODE_8BIT;
++	    (sdc_no == 2)) {
++		/* Keep the A523 eMMC in 4-bit mode until its 8-bit timing is tuned. */
++		if (!IS_ENABLED(CONFIG_MACH_SUN55I_A523))
++			cfg->host_caps = MMC_MODE_8BIT;
++	}
+ 
+ 	cfg->host_caps |= MMC_MODE_HS_52MHz | MMC_MODE_HS;
  	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
  
  	cfg->f_min = 400000;
@@ -140,29 +194,56 @@ index e28c81af..a7f1c934 100644
 +		 * MMC2 data reads show CRC errors at 52 MHz on Avaota A1 before
 +		 * the A523 sampling delay is tuned.  SPL has no device tree, so
 +		 * the board's max-frequency property cannot constrain this path.
++		 * Keep each request small as well: a 65535-block CMD18 exceeds the
++		 * controller's data timeout while loading the kernel from FAT.
 +		 */
 +		cfg->f_max = 25000000;
-+		printf("LYNX_MMC_SAFE_CLOCK: mmc=%d f_max=%u\n",
-+		       sdc_no, cfg->f_max);
++		cfg->b_max = 128;
++		printf("LYNX_MMC_SAFE_IO: mmc=%d f_max=%u b_max=%u\n",
++		       sdc_no, cfg->f_max, cfg->b_max);
 +	} else {
 +		cfg->f_max = 52000000;
 +	}
  
  	if (mmc_resource_init(sdc_no) != 0)
  		return NULL;
+@@ -709,6 +741,20 @@ static int sunxi_mmc_probe(struct udevice *dev)
+ 	priv->mmc_no = ((uintptr_t)priv->reg - SUNXI_MMC0_BASE) / 0x1000;
+ 	priv->mclkreg = (void *)ccu_reg + get_mclk_offset() + priv->mmc_no * 4;
+ 
++	if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) && priv->mmc_no == 2) {
++		/*
++		 * Keep MMC2 below the fixed 120 ms data-completion timeout.  This
++		 * path is used by U-Boot proper; the legacy setup above only covers
++		 * SPL.  At 25 MHz, 128 blocks (64 KiB) leave ample timeout margin.
++		 */
++		cfg->f_max = min(cfg->f_max, 25000000U);
++		cfg->b_max = 128;
++		cfg->host_caps &= ~MMC_MODE_8BIT;
++		cfg->host_caps |= MMC_MODE_4BIT;
++		printf("LYNX_MMC_SAFE_IO_DM: mmc=%u f_max=%u b_max=%u "
++		       "force_width=4\n", priv->mmc_no, cfg->f_max, cfg->b_max);
++	}
++
+ 	ret = clk_get_by_name(dev, "ahb", &gate_clk);
+ 	if (!ret)
+ 		clk_enable(&gate_clk);
 diff --git a/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts b/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
-index 054d0357..6db88272 100644
+index 054d0357c139f5f02f1be6be313e95b326e2da40..5b9aa86d199d98db1f5804c72698d7fc02eb654b 100644
 --- a/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
 +++ b/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
-@@ -129,8 +129,11 @@
+@@ -127,10 +127,13 @@
+ };
+ 
  &mmc2 {
- 	bus-width = <8>;
+-	bus-width = <8>;
++	bus-width = <4>;
  	cap-mmc-hw-reset;
 -	mmc-ddr-1_8v;
 -	mmc-hs200-1_8v;
 +	/*
-+	 * Keep SPL eMMC reads in the conservative timing range until the
-+	 * A523/T527 MMC2 sampling delay is validated on this board.
++	 * Keep eMMC in conservative SDR timing until A523/T527 MMC2 TM4
++	 * 8-bit sampling delay calibration is implemented and validated.
 +	 */
 +	max-frequency = <25000000>;
  	non-removable;

@@ -6,6 +6,7 @@ Development-only dependencies are checked out at exact commits.
 
 The artifact verifier checks:
 
+- U-Boot and Linux MMC2 DTs are 4-bit/25 MHz and Linux is SDR-only;
 - eGON signature, length and checksum;
 - exact bootloader bytes at 8 KiB;
 - U-Boot and TF-A FIT payload addresses;
@@ -13,8 +14,13 @@ The artifact verifier checks:
 - MBR partition types and 16/256 MiB offsets;
 - exact FAT and ext4 partition bytes;
 - FAT kernel, DTB and extlinux contents;
-- ext4 integrity, label, `/boot` files and installed modules;
+- FAT and ext4 integrity, rootfs label, `/boot` files and installed modules;
 - required effective Linux configuration symbols.
+
+The loader verifier independently checks the IMAGEWTY v3 header, fixed whole-
+image SHA-256, exact five-entry order, maintype/subtype values, payload sizes
+and individual payload hashes. A clean-directory Dragon rebuild must produce
+the same loader hash.
 
 `CLEAN_BUILD=1` is the default and rebuilds TF-A, U-Boot and Buildroot from
 clean outputs. After a host interruption that did not change sources,

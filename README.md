@@ -1,22 +1,41 @@
-# Avaota A1 T527 Mainline Linux
+# Avaota A1 / T527 Mainline Linux
 
-Reproducible, source-first support for the Avaota A1 (Allwinner
-T527/A523 family) using:
+面向 Avaota A1（Allwinner T527/A523）的可复现主线启动与烧录工程：
 
 - U-Boot 2026.07
-- Trusted Firmware-A from the upstream A523 development commit
+- Trusted Firmware-A（A523 主线开发提交）
 - Linux 7.2
 - Buildroot 2026.05.1
-- Arm GNU AArch64 toolchain 10.3-2021.07
-- eMMC root filesystem
+- Arm GNU AArch64 10.3-2021.07
+- eMMC 持久启动
 
-The persistent boot chain is fully mainline. A board-matched Tina/IMAGEWTY
-loader is used **only in RAM** to enter Allwinner FES and safely program eMMC.
-SyterKit and vendor U-Boot are not part of the installed system.
+持久系统全部是主线组件。Tina 派生组件只组成一个 1.28 MiB 的专用
+RAM loader，用于从 BootROM FEL 进入 FES/SRV，永远不写入 eMMC。
 
-## One-command build
+## 两个且仅两个烧录输入
 
-On Ubuntu 24.04:
+| 文件 | 内容 | 目标 |
+|---|---|---|
+| `avaota-a1-t527-fes-loader.img` | 5 个板卡匹配的 Tina FES 启动条目，0 分区 | 只进入 RAM |
+| `avaota-a1-mainline-v6-stable-4bit.img` | 主线 SPL/FIT、FAT 内核分区、ext4 rootfs | 写入 eMMC |
+
+旧的完整 `installer_v3.img` 已从本流程废弃，不能再作为 loader 或最终固件。
+
+## 稳定 eMMC 配置
+
+现场日志确认 MMC2 在 8-bit 数据传输时出现 `DATA_CRC_ERROR`；把时钟降到
+25 MHz、把单次读降到 128 块仍不能消除。v6 因此统一采用：
+
+```text
+SPL             4-bit / 25 MHz / b_max=128
+U-Boot proper   4-bit / 25 MHz / b_max=128
+Linux           4-bit / 25 MHz / SDR-only
+重试策略         一次有限读重试，不循环
+```
+
+## 构建主线 raw
+
+Ubuntu 24.04 依赖：
 
 ```bash
 sudo apt install autoconf automake bc bison build-essential curl \
@@ -26,77 +45,94 @@ sudo apt install autoconf automake bc bison build-essential curl \
 make build
 ```
 
-默认执行干净构建。只有在同一源码锁定版本和同一工作树中续跑已中断的构建时，才使用
-`CLEAN_BUILD=0 make build`；发布复现必须至少完成一次默认干净构建。
-
-`scripts/bootstrap.sh` downloads the exact official release archives, verifies
-their SHA-256 hashes, checks out the two pinned Git commits, applies the board
-patches, and installs the Buildroot board files. Generated sources and images
-remain in `.work/` and `out/`; neither is committed.
-
-The result is:
-
-```text
-out/avaota-a1-full-mainline.img
-out/avaota-a1-full-mainline.img.sha256
-out/avaota-a1-full-mainline.img.xz
-out/avaota-a1-full-mainline.manifest
-```
-
-## Flash through FES
-
-Build OpenixCLI branch `feat/t527-mainline-emmc-fes` at the commit pinned in
-`manifests/sources.lock`, connect the board in FEL, and provide a licensed,
-board-matched loader:
+默认是干净构建。只有在源码和锁定文件完全未变、仅续跑被中断的同一工作树时，
+才使用：
 
 ```bash
-export OPENIXCLI=/path/to/openixcli
-export BOOTSTRAP_FIRMWARE=/path/to/avaota-a1-loader.img
-export DEVICE_LOCATION=libusb:BUS:PORT   # optional but recommended
-./scripts/flash.sh | tee flash.jsonl
+CLEAN_BUILD=0 make build
 ```
 
-The script refuses to flash unless the image passes the structural verifier.
-It requests:
+## 构建独立 FES loader
 
-1. RAM-only FEL to FES bootstrap.
-2. eMMC storage/capacity preflight.
-3. mainline SPL extraction from image offset 8 KiB.
-4. FES Boot0 programming.
-5. raw eMMC user-area image write.
-6. FES verification.
-7. `post-action=none`, so power cycling remains an explicit hardware action.
+仓库保存了已完成过 FEL→FES 转换的五个精确 Tina 输入及其哈希，但不复制
+Tina `dragon` 工具。提供 Tina 5 SDK 根目录即可确定性重建：
 
-The loader is not stored here because its redistribution licence has not been
-established. See [FES flashing](docs/fes-flashing.md).
+```bash
+TINA_SDK_ROOT=/absolute/path/to/AvaotaA1-Tina5-SDK_V1 make loader
+make verify-loader
+```
 
-## Verified hardware
+loader 合同：IMAGEWTY v3、未加密、恰好 5 个文件、0 分区、无 MBR、无
+Boot0、无内核、无 rootfs。
 
-- Board: Avaota A1 T527
-- DRAM: 4 GiB
-- Storage: 58.2 GiB eMMC; Boot0/Boot1 each 4 MiB
-- Console: UART0, 115200
-- Cold boot: BootROM → eMMC Boot0 mainline SPL → TF-A → U-Boot 2026.07 →
-  Linux 7.2 → `/dev/mmcblk1p2` Buildroot
+## 打包发布文件
 
-The successful cold-boot transcript and compact FES record are under `logs/`.
-The exact flashed 768 MiB image had SHA-256
-`7e2b0c34dde11dd0a73a810e6918640a941a703433a23f501c807e9d055b6bae`.
+```bash
+make package
+```
 
-## Documentation
+生成目录：
 
-- [Hardware and storage](docs/hardware.md)
-- [Boot chain and image layout](docs/boot-chain.md)
-- [Porting order](docs/porting-order.md)
-- [FES flashing](docs/fes-flashing.md)
-- [Failures and fixes](docs/failures-and-fixes.md)
-- [Reproducibility and validation](docs/reproducibility.md)
-- [Development journal](docs/development-journal.md)
+```text
+out/release-v6-stable-4bit/
+├── avaota-a1-mainline-v6-stable-4bit.img
+├── avaota-a1-mainline-v6-stable-4bit.img.xz
+├── avaota-a1-t527-fes-loader.img
+├── SHA256SUMS
+└── release.manifest
+```
 
-## Status
+## FEL/FES 烧录
 
-The final hardware image has completed an FES write/verify and a power-cycle
-cold boot to login. A clean-output repository build and structural artifact
-verification also pass. The newly rebuilt image is marked software-verified,
-not hardware-qualified; every source-lock or patch change still requires the
-FES and cold-boot gates before its hash can replace the qualified artifact.
+准备支持 `raw` 与 `--emmc-boot0-from-image` 的 OpenixCLI。关闭 LYNX GUI，
+让板子进入 FEL（USB `1f3a:efe8`），然后运行：
+
+```bash
+export OPENIXCLI=/absolute/path/to/openixcli
+./scripts/flash.sh
+```
+
+烧录 Release 文件时显式指定：
+
+```bash
+export OPENIXCLI=/absolute/path/to/openixcli
+export FES_LOADER=/path/to/avaota-a1-t527-fes-loader.img
+export IMAGE=/path/to/avaota-a1-mainline-v6-stable-4bit.img
+export IMAGE_SHA256=b61f688188a57283cf0f5606cf52aaded37b88ff254bce6d3ef79b0c40d32d09
+./scripts/flash.sh
+```
+
+脚本强制执行 loader/镜像验证、单 FEL 设备约束和 USB 占用检查。若
+FEL→FES 失败，不得直接重跑，必须手动重新进入 FEL。
+
+完整数据流：
+
+```text
+BootROM FEL
+  → 小 loader 进入 RAM
+  → FES/SRV
+  → eMMC 类型和容量预检
+  → 安装 raw@0x2000 的主线 SPL 到 Boot0
+  → 从物理 sector 0 写主线 raw 到 user area
+  → 整盘验证
+  → 冷断电再上电
+  → 主线 SPL → TF-A → U-Boot → Linux → Buildroot
+```
+
+## 状态
+
+- 2026-08-27 基准镜像完成过 FES 写入、校验和冷启动到登录提示符。
+- 2026-09-01 v6 stable-4bit 已完成构建、逐字节内容核对、SPL 校验、
+  FAT/ext4 检查和 OpenixCLI 离线预检。
+- v6 在完成新的实际烧录与冷启动前，状态是“离线验证通过，待硬件验收”。
+
+## 文档
+
+- [打包流程](docs/packaging.md)
+- [启动链与磁盘布局](docs/boot-chain.md)
+- [FES 烧录](docs/fes-flashing.md)
+- [失败原因与修复](docs/failures-and-fixes.md)
+- [复现与验证](docs/reproducibility.md)
+- [硬件信息](docs/hardware.md)
+- [移植顺序](docs/porting-order.md)
+- [开发记录](docs/development-journal.md)

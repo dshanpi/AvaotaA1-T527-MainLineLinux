@@ -24,7 +24,8 @@ need()
 	command -v "$1" >/dev/null 2>&1 || fail "missing host tool: $1"
 }
 
-for tool in cmp dd debugfs e2fsck find mcopy mdir mtype python3 sha256sum tune2fs xxd; do
+for tool in cmp dd debugfs dtc e2fsck find fsck.fat mcopy mdir mtype \
+	python3 sha256sum strings tune2fs xxd; do
 	need "$tool"
 done
 
@@ -35,9 +36,10 @@ boot_vfat="$images_dir/boot.vfat"
 rootfs="$images_dir/rootfs.ext2"
 image="$images_dir/Image"
 dtb="$images_dir/sun55i-t527-avaota-a1.dtb"
+uboot_dtb="$work_dir/u-boot-2026.07/u-boot.dtb"
 
 for file in "$bootloader" "$raw" "$boot_vfat" "$rootfs" "$image" "$dtb" \
-	"$linux_config"; do
+	"$uboot_dtb" "$linux_config"; do
 	[ -s "$file" ] || fail "missing or empty artifact: $file"
 done
 
@@ -78,7 +80,50 @@ cmp -s -n "$bootloader_size" -i "0:${bootrom_offset}" "$bootloader" "$raw" || \
 	fail "U-Boot overlaps the boot partition"
 
 tmp_dir=$(mktemp -d /tmp/avaota-mainline-verify.XXXXXX)
-trap 'rm -rf -- "$tmp_dir"' EXIT
+cleanup_verify_tmp()
+{
+	find "$tmp_dir" -type f -delete 2>/dev/null || true
+	find "$tmp_dir" -depth -type d -empty -delete 2>/dev/null || true
+}
+trap cleanup_verify_tmp EXIT
+
+dtc -q -I dtb -O dts -o "$tmp_dir/u-boot.dts" "$uboot_dtb"
+dtc -q -I dtb -O dts -o "$tmp_dir/linux.dts" "$dtb"
+python3 - "$tmp_dir/u-boot.dts" "$tmp_dir/linux.dts" <<'PY' || \
+	fail "U-Boot or Linux eMMC DT is not the stable 4-bit profile"
+import re
+import sys
+
+def node(text, name):
+    match = re.search(r"\b" + re.escape(name) + r"\s*\{", text)
+    if not match:
+        raise SystemExit(f"missing node: {name}")
+    position = match.end()
+    depth = 1
+    while position < len(text) and depth:
+        if text[position] == "{":
+            depth += 1
+        elif text[position] == "}":
+            depth -= 1
+        position += 1
+    return text[match.start():position]
+
+for kind, path in (("U-Boot", sys.argv[1]), ("Linux", sys.argv[2])):
+    data = open(path, encoding="utf-8").read()
+    mmc2 = node(data, "mmc@4022000")
+    if not re.search(r"bus-width\s*=\s*<0x04>;", mmc2):
+        raise SystemExit(f"{kind} mmc2 is not 4-bit")
+    if not re.search(r"max-frequency\s*=\s*<0x17d7840>;", mmc2):
+        raise SystemExit(f"{kind} mmc2 is not capped at 25 MHz")
+    if kind == "Linux":
+        for forbidden in ("mmc-ddr-1_8v", "mmc-hs200-1_8v"):
+            if forbidden in mmc2:
+                raise SystemExit(f"Linux mmc2 contains {forbidden}")
+        for required in ("no-sd;", "no-sdio;", "non-removable;"):
+            if required not in mmc2:
+                raise SystemExit(f"Linux mmc2 is missing {required}")
+PY
+
 dd if="$bootloader" of="$tmp_dir/firmware.fit" bs=1 \
 	skip="$fit_in_bootloader" status=none
 fit_listing=$($dumpimage -l "$tmp_dir/firmware.fit")
@@ -126,6 +171,7 @@ printf '%s\n' "$extlinux" | grep -q '^  fdt /sun55i-t527-avaota-a1.dtb$' || \
 printf '%s\n' "$extlinux" | grep -q 'root=/dev/mmcblk1p2 rootwait rw' || \
 	fail "extlinux root filesystem arguments are wrong"
 
+fsck.fat -vn "$boot_vfat" >/dev/null || fail "boot.vfat failed read-only fsck"
 e2fsck -fn "$rootfs" >/dev/null || fail "rootfs.ext2 failed read-only fsck"
 label=$(tune2fs -l "$rootfs" 2>/dev/null | awk -F: '/Filesystem volume name:/ {sub(/^[[:space:]]+/, "", $2); print $2}')
 [ "$label" = "rootfs" ] || fail "rootfs label is '$label', expected rootfs"
