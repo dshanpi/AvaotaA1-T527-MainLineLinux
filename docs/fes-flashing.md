@@ -1,42 +1,49 @@
-# FES flashing
+# FES 烧录
 
-## Supported path
+## 唯一支持路径
 
 ```text
-BootROM FEL
-  → board-matched Tina/IMAGEWTY loader in RAM
-  → FES storage detection
-  → FES eMMC Boot0 write
-  → FES raw user-area write
-  → FES verify
-  → explicit power cycle
-  → persistent pure-mainline system
+BootROM FEL (1f3a:efe8)
+  → 1.28 MiB 专用 IMAGEWTY loader，仅下载到 RAM
+  → FES/SRV 重新枚举
+  → 查询 eMMC 类型与容量
+  → 校验并安装 mainline raw@0x2000 SPL 到 Boot0
+  → 写完整 raw 到 eMMC user area
+  → 整盘读回验证
+  → 明确冷断电
 ```
 
-The bootstrap firmware initializes DRAM and starts FES. It is not copied into
-the final OS. Its board and DRAM parameters must match the target.
+不要使用完整 `installer_v3.img`，不要走普通 IMAGEWTY 分区烧录，也不要
+使用 NAND component 模式。
 
-`scripts/flash.sh` requires OpenixCLI raw mode with
-`--emmc-boot0-from-image`. NAND component mode is unrelated and must never be
-used for T527 eMMC. Conversely, the eMMC raw path must not be reused for raw
-SPI-NAND.
+OpenixCLI 命令合同：
 
-The hardware-qualified OpenixCLI and libefex revisions are pinned in
-`manifests/sources.lock`. The libefex revision also carries the case-correct
-MinGW `setupapi.h` include used to build the Windows CLI from Linux.
+```bash
+openixcli --output jsonl raw \
+  avaota-a1-t527-fes-loader.img \
+  avaota-a1-mainline-v6-stable-4bit.img \
+  --mode command \
+  --emmc-boot0-from-image \
+  --device-location libusb:BUS:DEVICE
+```
 
-## Loader licensing
+仓库的 `scripts/flash.sh` 在执行该命令前验证 loader、raw 和 USB 所有权。
 
-The tested loader was extracted from a Tina/IMAGEWTY package whose standalone
-redistribution licence could not be identified. It is therefore deliberately
-excluded from this public repository. Users must supply a loader from their
-licensed SDK or board package.
+## Loader 写入边界
 
-## Safety rules
+独立 loader 只有 `fes1.fex`、`u-boot.fex`、`config.fex`、`board.fex`
+和 `sunxi.fex`。它没有 MBR 或任何分区，OpenixCLI 只从中提取 DRAM/FES
+启动数据。持久介质写入内容只来自第二个参数的 mainline raw。
 
-- Bind to the USB physical location when more than one Allwinner device exists.
-- Reject targets that do not report eMMC.
-- Reject images larger than the probed capacity.
-- Do not silently retry after a USB/FES failure; return the board to FEL.
-- Keep `post-action=none` for validation so the power cycle is observable.
-- Treat Boot0 status verification separately from user-area byte verification.
+仓库所有者已确认可以公开备份和分发该 Tina 派生的小 loader。来源及第三方
+权利边界记录在 `loader/t527-fes/PROVENANCE.md`。
+
+## 安全规则
+
+- LYNX GUI 和 OpenixCLI 不能同时占用 USB。
+- 默认要求恰好一个 `1f3a:efe8` FEL 设备。
+- 必须绑定具体 libusb 位置。
+- FES 必须报告 eMMC，容量必须大于 raw。
+- FEL→FES 失败后不能自动重试；先手动重新进入 FEL。
+- Boot0 状态验证和 user-area 全镜像验证是两个不同门槛。
+- 烧录完成后必须冷断电测试，FES 成功不等于 BootROM 冷启动成功。

@@ -39,3 +39,23 @@
 - The software-verified image SHA-256 is
   `ee4935777ce2468c539c7219a0fb507ae41d424eca6ea94ec4090106740bd9c1`.
   It has not replaced the separately recorded hardware-qualified image.
+
+## 2026-09-01 — stable 4-bit v6 and dedicated loader
+
+- Decoded failed MMC transfers with `rint=0x40ac` as data CRC errors, not only
+  request-size timeouts.
+- Confirmed 8-bit still failed at 25 MHz and 128-block requests.
+- Unified SPL, U-Boot proper and Linux MMC2 at 4-bit/25 MHz; removed Linux
+  HS200 and DDR capabilities.
+- Retained explicit eMMC user-area selection, 128-block cap, one bounded retry
+  and safe U-Boot RAM top.
+- Rebuilt U-Boot and Linux DTB and assembled the v6 hardware candidate while
+  preserving the known kernel, extlinux file and complete rootfs bytes.
+- Replaced the 714 MiB installer-as-loader shortcut with a deterministic
+  1,337,344-byte IMAGEWTY loader containing exactly five files and no MBR or
+  partitions.
+- Reused the exact Tina `sunxi.fex` from the bootstrap set that previously
+  completed FEL→FES; rejected a different unqualified current-pack DTB.
+- Passed loader unpack comparison, SPL checksum, embedded U-Boot/DTB checks,
+  FAT/ext4 fsck and OpenixCLI no-device raw preflight.
+- v6 remains offline-verified until a new FES write and cold boot are recorded.

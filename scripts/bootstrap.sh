@@ -2,23 +2,44 @@
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 
-for tool in awk curl git patch sha256sum tar; do need "$tool"; done
+for tool in awk curl git mkdir mktemp mv patch rm rmdir sha256sum tar; do need "$tool"; done
 mkdir -p "$cache_dir" "$work_dir"
+bootstrap_scope=${BOOTSTRAP_SCOPE:-all}
+case "$bootstrap_scope" in
+	all|source-check) ;;
+	*) die "BOOTSTRAP_SCOPE must be all or source-check" ;;
+esac
 
 extract_archive() {
 	local name=$1 archive_name=$2 destination=$3
-	local url expected archive stamp patch_file patch_sha
+	local url expected archive part stamp patch_file patch_sha actual extract_root
 	url=$(source_field "$name" 4)
 	expected=$(source_field "$name" 5)
 	[ "$expected" != PENDING ] || die "source hash is not finalized: $name"
 	archive="$cache_dir/$archive_name"
+	part="$archive.part"
+	if [ -s "$archive" ]; then
+		actual=$(sha256sum "$archive" | awk '{print $1}')
+		if [ "$actual" != "$expected" ]; then
+			printf 'Discarding incomplete or corrupt cache file: %s\n' "$archive" >&2
+			rm -f -- "$archive"
+		fi
+	fi
 	if [ ! -s "$archive" ]; then
 		printf 'Downloading %s %s...\n' "$name" "$(source_field "$name" 3)"
-		curl -L --fail --retry 3 "$url" -o "$archive"
+		rm -f -- "$part"
+		curl -L --fail --retry 5 --retry-all-errors "$url" -o "$part"
+		verify_sha256 "$part" "$expected"
+		mv -- "$part" "$archive"
 	fi
 	verify_sha256 "$archive" "$expected"
 	if [ ! -d "$work_dir/$destination" ]; then
-		tar -xf "$archive" -C "$work_dir"
+		extract_root=$(mktemp -d "$work_dir/.extract-${destination}.XXXXXX")
+		tar -xf "$archive" -C "$extract_root"
+		[ -d "$extract_root/$destination" ] || \
+			die "archive did not contain the expected directory: $destination"
+		mv -- "$extract_root/$destination" "$work_dir/$destination"
+		rmdir -- "$extract_root"
 	fi
 	stamp="$work_dir/$destination/.avaota-source-sha256"
 	if [ -e "$stamp" ]; then
@@ -44,8 +65,11 @@ extract_archive() {
 extract_archive buildroot buildroot-2026.05.1.tar.xz buildroot-2026.05.1
 extract_archive linux linux-7.2.tar.xz linux-7.2
 extract_archive u-boot u-boot-2026.07.tar.bz2 u-boot-2026.07
-extract_archive toolchain gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz \
-	gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu
+if [ "$bootstrap_scope" = all ]; then
+	extract_archive toolchain \
+		gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz \
+		gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu
+fi
 
 clone_exact() {
 	local name=$1 destination=$2 url commit
@@ -63,8 +87,10 @@ clone_exact() {
 		die "failed to pin $name to $commit"
 }
 
-clone_exact trusted-firmware-a trusted-firmware-a-a523
-clone_exact libxcrypt libxcrypt
+if [ "$bootstrap_scope" = all ]; then
+	clone_exact trusted-firmware-a trusted-firmware-a-a523
+	clone_exact libxcrypt libxcrypt
+fi
 
 br="$work_dir/buildroot-2026.05.1"
 mkdir -p "$br/board/avaota"

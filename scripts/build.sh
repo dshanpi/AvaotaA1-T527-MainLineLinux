@@ -35,6 +35,6 @@ make -C "$buildroot" -j"$jobs"
 mkdir -p "$out_dir"
 install -m 0644 "$buildroot/output/images/avaota-a1-full-mainline.img" "$out_dir/"
 "$repo_dir/scripts/verify-artifacts.sh"
-"$repo_dir/scripts/package-release.sh"
 
 printf 'Build complete: %s/avaota-a1-full-mainline.img\n' "$out_dir"
+printf 'Next: build the FES loader, then run make package\n'

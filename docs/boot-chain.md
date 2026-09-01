@@ -14,6 +14,9 @@ Allwinner BootROM
 The FES loader is only a programming transport and is absent after a cold
 power cycle.
 
+The programming loader is a separate 1.28 MiB IMAGEWTY container with five
+RAM bootstrap files and no partitions. It is never embedded in this layout.
+
 ## User-area image
 
 | Offset | Content |
@@ -26,6 +29,11 @@ SPL calculates the U-Boot FIT sector from its eGON length. On this SoC a
 BootROM load from eMMC Boot0 can leave controller/card selection state
 inconsistent with the cached block descriptor. The U-Boot patch forces a real
 Boot1 → user-area transition before loading the raw FIT.
+
+MMC2 is constrained to 4-bit, 25 MHz and SDR in SPL, U-Boot proper and Linux.
+The driver limits requests to 128 blocks and permits one bounded retry. This
+replaces the earlier 8-bit profile that still produced data CRC errors after
+clock and request-size reductions.
 
 U-Boot relocation just below the 4 GiB boundary caused command text corruption
 on this board. `board_get_usable_ram_top()` therefore keeps U-Boot relocation

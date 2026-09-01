@@ -1,0 +1,4 @@
+[mbr]
+size = 16384
+
+[partition_start]
