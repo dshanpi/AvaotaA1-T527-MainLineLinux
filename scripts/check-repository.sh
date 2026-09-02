@@ -22,7 +22,7 @@ patch -d "$work_dir/linux-7.2" -p1 --dry-run -R \
 patch -d "$work_dir/u-boot-2026.07" -p1 --dry-run -R \
 	< "$repo_dir/patches/u-boot/0001-avaota-a1-emmc-coldboot-fixes.patch"
 
-grep -q 'root=/dev/mmcblk1p2' \
+grep -q 'root=/dev/mmcblk1p2 rootwait rw' \
 	"$work_dir/buildroot-2026.05.1/board/avaota/a1-mainline/rootfs-overlay/boot/extlinux/extlinux.conf"
 grep -q 'BR2_TOOLCHAIN_EXTERNAL_PATH="$(TOPDIR)/../gcc-arm-10.3' \
 	"$work_dir/buildroot-2026.05.1/configs/avaota_a1_mainline_defconfig"
@@ -33,6 +33,12 @@ grep -q 'max-frequency = <25000000>;' \
 	"$work_dir/u-boot-2026.07/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts"
 grep -q 'bus-width = <4>;' \
 	"$work_dir/linux-7.2/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts"
+grep -q 'LYNX_RECOVERY_FEL: armed' \
+	"$work_dir/u-boot-2026.07/arch/arm/mach-sunxi/board.c"
+grep -q 'val |= BIT(7);' \
+	"$work_dir/u-boot-2026.07/drivers/mmc/sunxi_mmc.c"
+grep -q 'trusted_openixcli_sha256=c370b3b5079ff67672728d127df57e1cb234e18a10febd4ca3cda36a635662ae' \
+	"$repo_dir/scripts/flash.sh"
 python3 - "$work_dir/linux-7.2/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts" <<'PY'
 import re
 import sys

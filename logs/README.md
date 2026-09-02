@@ -7,6 +7,9 @@
 - `successful-cold-boot-20260827.log` is the complete captured UART transcript
   containing the final FES handoff and power-cycle boot through the Buildroot
   login prompt.
+- `successful-v9-cold-boot-20260901.log` is the concise acceptance record for
+  the final TM4 fix: successful FES verification plus two cold boots through
+  SPL, U-Boot, Linux and a Buildroot root shell.
 
 The original development archive also contains failed experiments and raw
 per-transfer progress. Those files are not published here because they include

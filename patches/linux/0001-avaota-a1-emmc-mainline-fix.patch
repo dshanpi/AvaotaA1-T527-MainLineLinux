@@ -1,8 +1,8 @@
 diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
-index 474354fbfcec18bbfe50de3de3dc339e757221cb..1ae160fa81349fb041e1f8af185e6dc3900f15d1 100644
+index 474354f..1ae160f 100644
 --- a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
-@@ -168,10 +168,15 @@ &mmc0 {
+@@ -168,10 +168,15 @@
  };
  
  &mmc2 {

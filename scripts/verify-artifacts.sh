@@ -87,7 +87,7 @@ cleanup_verify_tmp()
 }
 trap cleanup_verify_tmp EXIT
 
-dtc -q -I dtb -O dts -o "$tmp_dir/u-boot.dts" "$uboot_dtb"
+dtc -f -q -I dtb -O dts -o "$tmp_dir/u-boot.dts" "$uboot_dtb"
 dtc -q -I dtb -O dts -o "$tmp_dir/linux.dts" "$dtb"
 python3 - "$tmp_dir/u-boot.dts" "$tmp_dir/linux.dts" <<'PY' || \
 	fail "U-Boot or Linux eMMC DT is not the stable 4-bit profile"
@@ -124,6 +124,10 @@ for kind, path in (("U-Boot", sys.argv[1]), ("Linux", sys.argv[2])):
                 raise SystemExit(f"Linux mmc2 is missing {required}")
 PY
 
+strings -a "$bootloader" | grep -Fq 'LYNX_MMC_TM4_INIT:' || \
+	fail "U-Boot/SPL does not contain the A523 TM4 cold-boot path"
+strings -a "$bootloader" | grep -Fq 'drv_dl=0x%08x' || \
+	fail "U-Boot/SPL has no drive-delay diagnostic"
 dd if="$bootloader" of="$tmp_dir/firmware.fit" bs=1 \
 	skip="$fit_in_bootloader" status=none
 fit_listing=$($dumpimage -l "$tmp_dir/firmware.fit")

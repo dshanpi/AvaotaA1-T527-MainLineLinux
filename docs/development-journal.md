@@ -59,3 +59,22 @@
 - Passed loader unpack comparison, SPL checksum, embedded U-Boot/DTB checks,
   FAT/ext4 fsck and OpenixCLI no-device raw preflight.
 - v6 remains offline-verified until a new FES write and cold boot are recorded.
+
+## 2026-09-01 — v9 TM4 cold-boot hardware closure
+
+- Reproduced `CMD18` data CRC failures even at 4-bit, 25 MHz and 128-block
+  requests, proving those conservative limits alone were not the root fix.
+- Matched the Tina timing-mode-4 setup for T527/A523-family MMC2: 1x mode,
+  180-degree output phase, drive-delay enable above identification rate,
+  software-controlled sample delay 0, reset sequencing and controller setup.
+- Limited the change to the T527/A523-family SPL and U-Boot MMC2 path. Linux,
+  DTB, extlinux and rootfs were byte-preserved from the image that had already
+  entered the filesystem. OpenixCLI remained unchanged and hash-gated.
+- Added bounded fallback from a failed SPL eMMC boot to standard BootROM FEL.
+- OpenixCLI wrote 805,306,368 bytes, verified the raw with `errorCode=0`, and
+  reported `Raw disk image flashed successfully`.
+- Two independent cold boots loaded FIT, `/Image` and the board DTB from eMMC,
+  detected both partitions, mounted `/dev/mmcblk1p2` read-write and reached a
+  Buildroot root shell. The second boot also completed ext4 journal recovery.
+- Hardware-qualified raw SHA-256:
+  `22d9775202898f55814bee156058d8d010c2461f67cb11e7dc35c8c8c609d5f2`.

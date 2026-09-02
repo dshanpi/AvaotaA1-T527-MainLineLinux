@@ -21,10 +21,10 @@ OpenixCLI 命令合同：
 ```bash
 openixcli --output jsonl raw \
   avaota-a1-t527-fes-loader.img \
-  avaota-a1-mainline-v6-stable-4bit.img \
+  avaota-a1-mainline-v9-tm4-coldboot.img \
   --mode command \
   --emmc-boot0-from-image \
-  --device-location libusb:BUS:DEVICE
+  --device-location libusb:BUS:PORT
 ```
 
 仓库的 `scripts/flash.sh` 在执行该命令前验证 loader、raw 和 USB 所有权。
@@ -47,3 +47,8 @@ openixcli --output jsonl raw \
 - FEL→FES 失败后不能自动重试；先手动重新进入 FEL。
 - Boot0 状态验证和 user-area 全镜像验证是两个不同门槛。
 - 烧录完成后必须冷断电测试，FES 成功不等于 BootROM 冷启动成功。
+
+2026-09-01 的 v9 实机烧录返回 `errorCode=0` 和
+`Raw disk image flashed successfully`；随后的两次冷启动均从 eMMC 进入
+Buildroot root shell。完整验收摘要见
+[`logs/successful-v9-cold-boot-20260901.log`](../logs/successful-v9-cold-boot-20260901.log)。

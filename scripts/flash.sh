@@ -23,9 +23,12 @@ else
 	die "build artifacts are absent; set IMAGE_SHA256 to the trusted release hash"
 fi
 
-if [ -n "${OPENIXCLI_SHA256:-}" ]; then
-	verify_sha256 "$(command -v "$openixcli")" "$OPENIXCLI_SHA256"
+trusted_openixcli_sha256=c370b3b5079ff67672728d127df57e1cb234e18a10febd4ca3cda36a635662ae
+if [ -n "${OPENIXCLI_SHA256:-}" ] && \
+	[ "$OPENIXCLI_SHA256" != "$trusted_openixcli_sha256" ]; then
+	die "OPENIXCLI_SHA256 is not approved by docs/openixcli-change-gate.md"
 fi
+verify_sha256 "$(command -v "$openixcli")" "$trusted_openixcli_sha256"
 
 if pgrep -x lynx-app >/dev/null; then
 	die "lynx-app is running and may claim the Allwinner USB device"
@@ -36,16 +39,15 @@ fi
 
 device_location=${DEVICE_LOCATION:-}
 if [ -z "$device_location" ]; then
-	mapfile -t fel_devices < <(lsusb -d 1f3a:efe8)
-	[ "${#fel_devices[@]}" -eq 1 ] || \
-		die "expected exactly one FEL device (1f3a:efe8), found ${#fel_devices[@]}"
-	if [[ ${fel_devices[0]} =~ ^Bus[[:space:]]+([0-9]+)[[:space:]]+Device[[:space:]]+([0-9]+): ]]; then
-		bus=$((10#${BASH_REMATCH[1]}))
-		port=$((10#${BASH_REMATCH[2]}))
-		device_location="libusb:$bus:$port"
-	else
-		die "cannot parse FEL USB location: ${fel_devices[0]}"
-	fi
+	# lsusb's "Device NNN" is an enumeration address, not the physical port
+	# expected by OpenixCLI's libusb:BUS:PORT selector.  Ask OpenixCLI for the
+	# canonical location so reconnecting FEL/FES cannot target the wrong path.
+	scan=$($openixcli scan 2>&1) || die "OpenixCLI did not find a FEL device: $scan"
+	mapfile -t fel_locations < <(printf '%s\n' "$scan" |
+		awk '/Physical location: libusb:[0-9]+:[0-9]+/ {print $3}')
+	[ "${#fel_locations[@]}" -eq 1 ] || \
+		die "expected exactly one FEL physical location, found ${#fel_locations[@]}: $scan"
+	device_location=${fel_locations[0]}
 fi
 case "$device_location" in libusb:*:*) ;; *) die "invalid DEVICE_LOCATION: $device_location";; esac
 

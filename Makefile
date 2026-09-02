@@ -1,4 +1,4 @@
-.PHONY: bootstrap check build loader verify-loader verify package clean
+.PHONY: bootstrap check build loader verify-loader verify verify-v9 package clean
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -17,6 +17,9 @@ verify-loader:
 
 verify:
 	./scripts/verify-artifacts.sh
+
+verify-v9:
+	./scripts/verify-v9-candidate.sh
 
 package:
 	./scripts/package-release.sh

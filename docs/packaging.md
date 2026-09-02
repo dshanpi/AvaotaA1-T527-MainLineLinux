@@ -52,23 +52,28 @@ Buildroot 的 `genimage` 布局：
 `make build` 依次构建 TF-A、U-Boot 和 Buildroot，再执行结构验证。loader
 不嵌入 raw；raw 中 8 KiB 处的 SPL/U-Boot 是断电后的持久启动组件。
 
-## 3. v6 硬件候选镜像的组装
+## 3. v9 TM4 冷启动实机验证镜像的组装
 
-当前 v6 硬件候选以已验证的 768 MiB 基准 raw 为底，只替换重新构建的
-主线 U-Boot 和 Linux DTB：
+根据实机证据，v9 只替换发生冷启动失败的 SPL/U-Boot；Linux、DTB、boot.vfat
+和 rootfs.ext4 与已写入成功且进入过文件系统的 v7 逐字节保持一致：
 
 ```bash
-cp --reflink=auto BASE.img avaota-a1-mainline-v6-stable-4bit.img
+cp --reflink=auto avaota-a1-mainline-v7-tm4-csdc.img \
+  avaota-a1-mainline-v9-tm4-coldboot.img
 dd if=u-boot-sunxi-with-spl.bin \
-  of=avaota-a1-mainline-v6-stable-4bit.img bs=8192 seek=1 conv=notrunc
-mcopy -o -i 'avaota-a1-mainline-v6-stable-4bit.img@@16777216' \
-  sun55i-t527-avaota-a1.dtb ::/sun55i-t527-avaota-a1.dtb
+  of=avaota-a1-mainline-v9-tm4-coldboot.img bs=8192 seek=1 conv=notrunc
 ```
 
-内核、extlinux 配置和整个 512 MiB rootfs 与基准镜像逐字节一致。
+验证器检查 U-Boot/SPL 包含 TM4 与自动 FEL 恢复路径，并逐字节证明 v9 在
+U-Boot 占用区之外与 v7 相同；FAT、Image、DTB、ext4 不重新生成。
+
+实机验收所用 raw 的 SHA-256 固定为
+`22d9775202898f55814bee156058d8d010c2461f67cb11e7dc35c8c8c609d5f2`。
+发布脚本拒绝打包任何哈希不同的 raw、loader 或 U-Boot，防止把“重新编译但
+尚未上板”的产物误标成实机验证版本。
 
 ## 4. GitHub 发布
 
 源码、配置、补丁、loader 输入和工具脚本进入 Git。768 MiB raw 不进入
-Git 历史；发布时上传 `.img.xz`、独立 loader、`SHA256SUMS` 和 manifest
-到 GitHub Release。
+Git 历史；发布时上传 `.img.xz`、独立 loader、对应的 U-Boot/SPL、
+`SHA256SUMS` 和 manifest 到 GitHub Release。

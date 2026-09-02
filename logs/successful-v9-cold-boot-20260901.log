@@ -1,0 +1,56 @@
+# Avaota A1 / T527 v9 hardware acceptance — 2026-09-01
+#
+# Selected exact UART/OpenixCLI evidence from the accepted run. This is a
+# concise acceptance record, not a claim to be the complete UART transcript.
+
+[FES flash]
+FEX_CMD_fes_verify last err=0
+boot0 size = 0xc000
+FEX_CMD_fes_verify last err=0
+OpenixCLI transferredBytes=805306368 total=805306368 percent=100.0
+OpenixCLI errorCode=0 status=success type=verify
+OpenixCLI Raw disk image flashed successfully
+
+[cold boot 1: SPL/U-Boot]
+U-Boot SPL 2026.07-dirty (Sep 01 2026 - 23:27:38 -0400)
+DRAM: 4096 MiB
+LYNX_RECOVERY_FEL: armed after boot device 2
+Trying to boot from MMC2
+LYNX_MMC_SAFE_IO: mmc=2 f_max=25000000 b_max=128
+LYNX_MMC_TM4_INIT: mmc=2 timeout=0xffffffff thldc=0x02000005 csdc=0x00000003 dbgc=0x00000001
+LYNX_MMC_IOS: mmc=2 width=4 clock=25000000 mclk=0x8100000f ntsr=0x01710000 drv_dl=0x00030080 samp_dl=0x00000080 width_reg=0x00000001
+LYNX_MMC_DIAG: read sector=0x70 blksz=512
+NOTICE:  BL31: Found U-Boot DTB at 0xa0ace78, model: Avaota A1
+U-Boot 2026.07-dirty (Sep 01 2026 - 23:27:38 -0400) Allwinner Technology
+Found /extlinux/extlinux.conf
+Retrieving file: /Image
+append: console=ttyS0,115200 earlycon root=/dev/mmcblk1p2 rootwait rw fsck.repair=yes net.ifnames=0
+Retrieving file: /sun55i-t527-avaota-a1.dtb
+Starting kernel ...
+
+[cold boot 1: Linux/rootfs]
+Linux version 7.2.0-avaota-a1-mainline
+mmc1: new high speed DDR MMC card at address 0001
+mmcblk1: mmc1:0001 CJNB4R 58.2 GiB
+ mmcblk1: p1 p2
+EXT4-fs (mmcblk1p2): mounted filesystem cd55d00b-ea80-488b-a005-a7ef05929390 r/w with ordered data mode. Quota mode: none.
+VFS: Mounted root (ext4 filesystem) on device 179:2.
+Run /sbin/init as init process
+Avaota A1 mainline Linux / Buildroot 2026.05.1
+avaota-a1 login: root
+Linux avaota-a1 7.2.0-avaota-a1-mainline #3 SMP PREEMPT Wed Aug 26 07:40:32 EDT 2026 aarch64 GNU/Linux
+
+[cold boot 2]
+The same SPL TM4 values were observed again.
+U-Boot retrieved /Image and /sun55i-t527-avaota-a1.dtb from eMMC.
+mmcblk1 exposed p1 and p2.
+EXT4-fs (mmcblk1p2): recovery complete
+VFS: Mounted root (ext4 filesystem) on device 179:2.
+Avaota A1 mainline Linux / Buildroot 2026.05.1
+avaota-a1 login: root
+
+[accepted artifact hashes]
+raw_sha256=22d9775202898f55814bee156058d8d010c2461f67cb11e7dc35c8c8c609d5f2
+bootloader_sha256=0d405263a5ea10bf97c64e5f07c5b04b11a484372ce1c8fd769980ca4e5b70c3
+loader_sha256=867d43d12399016252a3d34c2ae50f6f362868f95c2985169d5a4b655a16417c
+openixcli_sha256=c370b3b5079ff67672728d127df57e1cb234e18a10febd4ca3cda36a635662ae

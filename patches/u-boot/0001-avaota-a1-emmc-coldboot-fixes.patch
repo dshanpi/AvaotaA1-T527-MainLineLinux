@@ -1,5 +1,5 @@
 diff --git a/arch/arm/mach-sunxi/board.c b/arch/arm/mach-sunxi/board.c
-index 432b1c10f92c294f36bcc5a3f252984686da2bea..e589db518c11e031853533c74376eb7b6ac4c7c1 100644
+index 432b1c1..0733279 100644
 --- a/arch/arm/mach-sunxi/board.c
 +++ b/arch/arm/mach-sunxi/board.c
 @@ -69,6 +69,19 @@ struct mm_region *mem_map = sunxi_mem_map;
@@ -22,8 +22,35 @@ index 432b1c10f92c294f36bcc5a3f252984686da2bea..e589db518c11e031853533c74376eb7b
  	/* Some devices (like the EMAC) have a 32-bit DMA limit. */
  	if (gd->ram_top > (1ULL << 32))
  		return 1ULL << 32;
+@@ -221,6 +234,26 @@ static int spl_board_load_image(struct spl_image_info *spl_image,
+ 	return 0;
+ }
+ SPL_LOAD_IMAGE_METHOD("FEL", 0, BOOT_DEVICE_BOARD, spl_board_load_image);
++
++void board_boot_order(u32 *spl_boot_list)
++{
++	u32 boot_device = spl_boot_device();
++
++	spl_boot_list[0] = boot_device;
++
++	/*
++	 * A failed cold eMMC read must remain recoverable without another
++	 * board-specific FEL key sequence.  Returning through the standard
++	 * sunxi BOOT_DEVICE_BOARD method hands control back to BootROM FEL.
++	 * Keep every other sunxi platform's one-device boot order unchanged.
++	 */
++	if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) &&
++	    boot_device != BOOT_DEVICE_BOARD) {
++		printf("LYNX_RECOVERY_FEL: armed after boot device %u\n",
++		       boot_device);
++		spl_boot_list[1] = BOOT_DEVICE_BOARD;
++	}
++}
+ #endif /* CONFIG_XPL_BUILD */
+ 
+ #define SUNXI_INVALID_BOOT_SOURCE	-1
 diff --git a/common/spl/spl_mmc.c b/common/spl/spl_mmc.c
-index cc16709dc9b1bc29e1de78cde7ff6af12780d914..8e8a7af5f252c39cd9850ff05852f5851c0b479f 100644
+index cc16709..8e8a7af 100644
 --- a/common/spl/spl_mmc.c
 +++ b/common/spl/spl_mmc.c
 @@ -45,9 +45,12 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
@@ -83,7 +110,7 @@ index cc16709dc9b1bc29e1de78cde7ff6af12780d914..8e8a7af5f252c39cd9850ff05852f585
  						raw_sect +
  						spl_mmc_raw_uboot_offset(part));
 diff --git a/configs/avaota-a1_defconfig b/configs/avaota-a1_defconfig
-index a1f89927f5e1fa831fda1dec4ad668e55c8ff685..1d1e49ac72774d4d9183076cbcabd4b801f3f1c9 100644
+index a1f8992..1d1e49a 100644
 --- a/configs/avaota-a1_defconfig
 +++ b/configs/avaota-a1_defconfig
 @@ -1,7 +1,10 @@
@@ -112,7 +139,7 @@ index a1f89927f5e1fa831fda1dec4ad668e55c8ff685..1d1e49ac72774d4d9183076cbcabd4b8
  CONFIG_USB_OHCI_HCD=y
 +# CONFIG_USB_KEYBOARD is not set
 diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
-index 2e565560656422b99a4dd999d11ce7998bb06088..11b1538f9f4d86ba364f2acbd9775dea37254a39 100644
+index 2e56556..11b1538 100644
 --- a/drivers/mmc/mmc.c
 +++ b/drivers/mmc/mmc.c
 @@ -551,9 +551,23 @@ ulong mmc_bread(struct blk_desc *block_dev, lbaint_t start, lbaint_t blkcnt,
@@ -140,24 +167,113 @@ index 2e565560656422b99a4dd999d11ce7998bb06088..11b1538f9f4d86ba364f2acbd9775dea
  		start += cur;
  		dst += cur * mmc->read_bl_len;
 diff --git a/drivers/mmc/sunxi_mmc.c b/drivers/mmc/sunxi_mmc.c
-index e28c81afffec1ac47b31a3d309d78979407c74e2..263f3b803558d9fc3b2f99136e38d68e60138e2e 100644
+index e28c81a..dfc0787 100644
 --- a/drivers/mmc/sunxi_mmc.c
 +++ b/drivers/mmc/sunxi_mmc.c
-@@ -259,6 +259,13 @@ static int sunxi_mmc_set_ios_common(struct sunxi_mmc_priv *priv,
+@@ -50,6 +50,61 @@ struct sunxi_mmc_priv {
+ 	struct mmc_config cfg;
+ };
+ 
++static bool sunxi_mmc_is_a523_mmc2(struct sunxi_mmc_priv *priv)
++{
++	return IS_ENABLED(CONFIG_MACH_SUN55I_A523) && priv->mmc_no == 2;
++}
++
++/* Match the vendor timing-mode-4 defaults for legacy/SDR operation. */
++static void sunxi_mmc_a523_tm4_set_timing(struct sunxi_mmc_priv *priv,
++					 unsigned int hz)
++{
++	u32 val;
++
++	if (!sunxi_mmc_is_a523_mmc2(priv))
++		return;
++
++	/* Controller v0x50500 must use 1x mode, not generic sunxi 2x mode. */
++	clrbits_le32(&priv->reg->ntsr, SUNXI_MMC_NTSR_MODE_SEL_NEW);
++
++	/* Tina TM4_OUT_PH180: both output-delay phase bits are set. */
++	val = readl(&priv->reg->drv_dl);
++	val &= ~(0x3 << 16);
++	val |= 0x3 << 16;
++	/* Tina enables the TM4 drive-delay circuit above identification rate. */
++	if (hz <= 400000)
++		val &= ~BIT(7);
++	else
++		val |= BIT(7);
++	writel(val, &priv->reg->drv_dl);
++
++	/* Tina sdly=0 with software delay control enabled. */
++	val = readl(&priv->reg->samp_dl);
++	val &= ~0x3f;
++	val |= SUNXI_MMC_CAL_DL_SW_EN;
++	writel(val, &priv->reg->samp_dl);
++}
++
++static void sunxi_mmc_a523_tm4_core_init(struct sunxi_mmc_priv *priv)
++{
++	if (!sunxi_mmc_is_a523_mmc2(priv))
++		return;
++
++	/* Values used by Tina's v0x50500 timing-mode-4 host driver. */
++	writel(0xffffffff, &priv->reg->timeout);
++	writel(SUNXI_MMC_THLDC_READ_THLD(512) |
++	       SUNXI_MMC_THLDC_WRITE_EN | SUNXI_MMC_THLDC_READ_EN,
++	       &priv->reg->thldc);
++	writel(3, &priv->reg->csdc);
++	writel(0xdeb, &priv->reg->dbgc);
++
++	printf("LYNX_MMC_TM4_INIT: mmc=%u timeout=0x%08x thldc=0x%08x "
++	       "csdc=0x%08x dbgc=0x%08x\n",
++	       priv->mmc_no, readl(&priv->reg->timeout),
++	       readl(&priv->reg->thldc), readl(&priv->reg->csdc),
++	       readl(&priv->reg->dbgc));
++}
++
+ /*
+  * All A64 and later MMC controllers feature auto-calibration. This would
+  * normally be detected via the compatible string, but we need something
+@@ -74,6 +129,16 @@ static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
+ 	if (IS_ENABLED(CONFIG_MACH_SUN8I_A83T) && priv->mmc_no != 2)
+ 		new_mode = false;
+ 
++	/*
++	 * A523/T527 MMC2 is timing-mode-4 hardware.  The vendor TM4 driver
++	 * explicitly clears NTSR bit 31 for controller version >= 0x50300 to
++	 * disable 2x mode.  Keeping the generic sunxi new mode enabled causes
++	 * cold-boot CMD18 reads to complete with DATA_CRC_ERROR.
++	 */
++	if (sunxi_mmc_is_a523_mmc2(priv)) {
++		new_mode = false;
++	}
++
+ 	if (hz <= 24000000) {
+ 		pll = CCM_MMC_CTRL_OSCM24;
+ 		pll_hz = 24000000;
+@@ -172,6 +237,7 @@ static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
+ 
+ 	writel(CCM_MMC_CTRL_ENABLE| pll | CCM_MMC_CTRL_N(n) |
+ 	       CCM_MMC_CTRL_M(div) | val, priv->mclkreg);
++	sunxi_mmc_a523_tm4_set_timing(priv, hz);
+ 
+ 	debug("mmc %u set mod-clk req %u parent %u n %u m %u rate %u\n",
+ 	      priv->mmc_no, hz, pll_hz, 1u << n, div, pll_hz / (1u << n) / div);
+@@ -259,6 +325,15 @@ static int sunxi_mmc_set_ios_common(struct sunxi_mmc_priv *priv,
  	else
  		writel(0x0, &priv->reg->width);
  
-+	if (IS_ENABLED(CONFIG_MACH_SUN55I_A523) && priv->mmc_no == 2)
++	if (sunxi_mmc_is_a523_mmc2(priv))
 +		printf("LYNX_MMC_IOS: mmc=%u width=%u clock=%u mclk=0x%08x "
-+		       "ntsr=0x%08x samp_dl=0x%08x width_reg=0x%08x\n",
++		       "ntsr=0x%08x drv_dl=0x%08x samp_dl=0x%08x "
++		       "width_reg=0x%08x\n",
 +		       priv->mmc_no, mmc->bus_width, mmc->clock,
 +		       readl(priv->mclkreg), readl(&priv->reg->ntsr),
-+		       readl(&priv->reg->samp_dl), readl(&priv->reg->width));
++		       readl(&priv->reg->drv_dl), readl(&priv->reg->samp_dl),
++		       readl(&priv->reg->width));
 +
  	return 0;
  }
  
-@@ -456,6 +463,14 @@ static int sunxi_mmc_send_cmd_common(struct sunxi_mmc_priv *priv,
+@@ -456,6 +531,14 @@ static int sunxi_mmc_send_cmd_common(struct sunxi_mmc_priv *priv,
  	}
  out:
  	if (error < 0) {
@@ -172,7 +288,53 @@ index e28c81afffec1ac47b31a3d309d78979407c74e2..263f3b803558d9fc3b2f99136e38d68e
  		writel(SUNXI_MMC_GCTRL_RESET, &priv->reg->gctrl);
  		mmc_update_clk(priv);
  	}
-@@ -577,14 +592,31 @@ struct mmc *sunxi_mmc_init(int sdc_no)
+@@ -466,18 +549,29 @@ out:
+ 	return error;
+ }
+ 
+-static void sunxi_mmc_reset(void *regs)
++static void sunxi_mmc_reset(struct sunxi_mmc_priv *priv)
+ {
++	void *regs = priv->reg;
++
+ 	/* Reset controller */
+ 	writel(SUNXI_MMC_GCTRL_RESET, regs + SUNXI_MMC_GCTRL);
+ 	udelay(1000);
+ 
+ 	if (IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)) {
+-		/* Reset card */
+-		writel(SUNXI_MMC_HWRST_ASSERT, regs + SUNXI_MMC_HWRST);
+-		udelay(10);
+-		writel(SUNXI_MMC_HWRST_DEASSERT, regs + SUNXI_MMC_HWRST);
+-		udelay(300);
++		if (sunxi_mmc_is_a523_mmc2(priv)) {
++			/* Exact reset sequence and settling delays from Tina TM4. */
++			writel(SUNXI_MMC_HWRST_DEASSERT, regs + SUNXI_MMC_HWRST);
++			writel(SUNXI_MMC_HWRST_ASSERT, regs + SUNXI_MMC_HWRST);
++			udelay(1000);
++			writel(SUNXI_MMC_HWRST_DEASSERT, regs + SUNXI_MMC_HWRST);
++			udelay(1000);
++		} else {
++			/* Reset card */
++			writel(SUNXI_MMC_HWRST_ASSERT, regs + SUNXI_MMC_HWRST);
++			udelay(10);
++			writel(SUNXI_MMC_HWRST_DEASSERT, regs + SUNXI_MMC_HWRST);
++			udelay(300);
++		}
+ 
+ 		/* Setup FIFO R/W threshold. Needed on H616. */
+ 		writel(SUNXI_MMC_THLDC_READ_THLD(512) |
+@@ -533,7 +627,8 @@ static int sunxi_mmc_core_init(struct mmc *mmc)
+ {
+ 	struct sunxi_mmc_priv *priv = mmc->priv;
+ 
+-	sunxi_mmc_reset(priv->reg);
++	sunxi_mmc_reset(priv);
++	sunxi_mmc_a523_tm4_core_init(priv);
+ 
+ 	return 0;
+ }
+@@ -577,14 +672,31 @@ struct mmc *sunxi_mmc_init(int sdc_no)
  
  	if ((IS_ENABLED(CONFIG_MACH_SUN50I) || IS_ENABLED(CONFIG_MACH_SUN8I) ||
  	    IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_MACH_SUN55I_A523)) &&
@@ -207,7 +369,7 @@ index e28c81afffec1ac47b31a3d309d78979407c74e2..263f3b803558d9fc3b2f99136e38d68e
  
  	if (mmc_resource_init(sdc_no) != 0)
  		return NULL;
-@@ -709,6 +741,20 @@ static int sunxi_mmc_probe(struct udevice *dev)
+@@ -709,6 +821,20 @@ static int sunxi_mmc_probe(struct udevice *dev)
  	priv->mmc_no = ((uintptr_t)priv->reg - SUNXI_MMC0_BASE) / 0x1000;
  	priv->mclkreg = (void *)ccu_reg + get_mclk_offset() + priv->mmc_no * 4;
  
@@ -228,8 +390,46 @@ index e28c81afffec1ac47b31a3d309d78979407c74e2..263f3b803558d9fc3b2f99136e38d68e
  	ret = clk_get_by_name(dev, "ahb", &gate_clk);
  	if (!ret)
  		clk_enable(&gate_clk);
+@@ -727,7 +853,8 @@ static int sunxi_mmc_probe(struct udevice *dev)
+ 
+ 	upriv->mmc = &plat->mmc;
+ 
+-	sunxi_mmc_reset(priv->reg);
++	sunxi_mmc_reset(priv);
++	sunxi_mmc_a523_tm4_core_init(priv);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/mmc/sunxi_mmc.h b/drivers/mmc/sunxi_mmc.h
+index 7186516..a4c225e 100644
+--- a/drivers/mmc/sunxi_mmc.h
++++ b/drivers/mmc/sunxi_mmc.h
+@@ -34,7 +34,7 @@ struct sunxi_mmc {
+ 	u32 cbcr;		/* 0x48 CIU byte count */
+ 	u32 bbcr;		/* 0x4c BIU byte count */
+ 	u32 dbgc;		/* 0x50 debug enable */
+-	u32 res0;		/* 0x54 reserved */
++	u32 csdc;		/* 0x54 CRC status detect control */
+ 	u32 a12a;		/* 0x58 Auto command 12 argument */
+ 	u32 ntsr;		/* 0x5c	New timing set register */
+ 	u32 res1[6];
+@@ -49,9 +49,11 @@ struct sunxi_mmc {
+ 	u32 res2[26];
+ #if defined(CONFIG_SUNXI_GEN_SUN6I) || defined(CONFIG_SUN50I_GEN_H6) || defined(CONFIG_SUNXI_GEN_NCAT2)
+ 	u32 thldc;		/* 0x100 Threshold control */
+-	u32 res3[16];
+-	u32 samp_dl;
+-	u32 res4[46];
++	u32 res3[15];
++	u32 drv_dl;		/* 0x140 Drive Delay Control */
++	u32 samp_dl;		/* 0x144 Sample Delay Control */
++	u32 ds_dl;		/* 0x148 Data Strobe Delay Control */
++	u32 res4[45];
+ #endif
+ 	u32 fifo;		/* 0x100 / 0x200 FIFO access address */
+ };
 diff --git a/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts b/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
-index 054d0357c139f5f02f1be6be313e95b326e2da40..5b9aa86d199d98db1f5804c72698d7fc02eb654b 100644
+index 054d035..5b9aa86 100644
 --- a/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
 +++ b/dts/upstream/src/arm64/allwinner/sun55i-t527-avaota-a1.dts
 @@ -127,10 +127,13 @@
