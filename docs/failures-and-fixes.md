@@ -13,6 +13,7 @@
 | SPL 失败后停在 `Please RESET`，再次进 FEL 很麻烦 | 默认启动顺序只尝试原启动介质 | 仅 T527/A523-family SPL 在 eMMC 失败后追加标准 `BOOT_DEVICE_BOARD`，自动返回 BootROM FEL |
 | FEL→FES USB 节点变化 | 重新枚举后 device address 改变 | 锁定物理 libusb 位置，仅允许唯一匹配设备 |
 | loader 体积 714 MiB、边界混乱 | 把完整 installer 当作 RAM loader 容器 | 改为 1.28 MiB、5 文件、0 分区的独立 FES loader |
+| v9 在 FAT 环境初始化时循环复位 | U-Boot MMC2 电源循环存在时序竞争；在时钟、CLDO3、CLDO1 操作之间加入同步 UART 输出后可启动 | 已定位但尚未形成发布修复；需要用显式延时或保持 eMMC 供电的板级策略替代诊断打印，并完成重复冷启动验收 |
 
 所有带 `diag`、`safe25`、`force-user`、`bmax`、SyterKit 或完整 installer
 的中间镜像只用于定位问题，不属于发布输入。
@@ -22,3 +23,6 @@ MMC2/eMMC：Linux 沿用已经进入过文件系统的原镜像，MMC0/MMC1 以�
 共用烧录逻辑均不改变。最终候选必须同时通过 eGON/FIT、分区偏移、FAT、ext4
 和 SHA-256 校验，实机验收则必须是彻底断电后的 BootROM → SPL → FIT →
 U-Boot → Linux → 登录提示符完整链路。
+
+2026-09-28 的复现和诊断见
+[`incident-20260928-mmc-power-timing.md`](incident-20260928-mmc-power-timing.md)。

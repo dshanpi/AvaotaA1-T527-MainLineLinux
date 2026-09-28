@@ -78,3 +78,18 @@
   Buildroot root shell. The second boot also completed ext4 journal recovery.
 - Hardware-qualified raw SHA-256:
   `22d9775202898f55814bee156058d8d010c2461f67cb11e7dc35c8c8c609d5f2`.
+
+## 2026-09-28 — v9 reset-loop reproduction and power timing isolation
+
+- Reflashed the exact published v9 raw and reproduced a continuous reset at
+  U-Boot's `Loading Environment from FAT...` MMC initialization.
+- Confirmed SPL still read eMMC, loaded FIT and entered TF-A/U-Boot, excluding
+  the raw image, Boot0, FIT and Linux/rootfs as the immediate failure point.
+- Rejected repeated A523 MMC2 hardware reset as the cause after a dedicated
+  candidate failed at the same point.
+- Added trace-only UART markers around MMC clock-off, CLDO3 and CLDO1 disable
+  operations. Both regulator calls returned success, and the board then booted
+  through extlinux, Linux, ext4 and the Buildroot login prompt.
+- Classified the remaining fault as an MMC/PMIC power-cycle timing race. The
+  diagnostic output is not a production fix; explicit board-scoped timing or
+  non-removable eMMC supply policy still requires repeated cold-boot testing.

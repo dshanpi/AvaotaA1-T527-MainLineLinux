@@ -1,0 +1,62 @@
+# Avaota A1 / T527 MMC power timing investigation — 2026-09-28
+#
+# Selected exact UART/OpenixCLI evidence from the investigation. High-frequency
+# flash progress and unrelated Linux probe output are omitted.
+
+[published v9 artifact]
+raw_sha256=22d9775202898f55814bee156058d8d010c2461f67cb11e7dc35c8c8c609d5f2
+bootloader_sha256=0d405263a5ea10bf97c64e5f07c5b04b11a484372ce1c8fd769980ca4e5b70c3
+result=reproducible-reset-loop
+last_lines:
+Loading Environment from FAT... LYNX_MMC_IOS: mmc=2 width=0 clock=0 mclk=0x80000000 ntsr=0x01710000 drv_dl=0x00030080 samp_dl=0x00000080 width_reg=0x00000000
+U-Boot SPL 2026.07-dirty (Sep 01 2026 - 23:27:38 -0400)
+
+[discarded repeat-HWRST hypothesis]
+image_sha256=81e2a4fecda163285adeff2c5f3b1b6fa521c6285cc1a2ec2292fd2248da2b55
+bootloader_sha256=38321a29c0fb42c85969e8670c60719ab1e7c1ddedbc25680cb382ac9fb4d1a0
+result=same-reset-loop
+last_lines:
+Loading Environment from FAT... LYNX_MMC_IOS: mmc=2 width=0 clock=0 mclk=0x80000000 ntsr=0x01710000 drv_dl=0x00030080 samp_dl=0x00000080 width_reg=0x00000000
+U-Boot SPL 2026.07 (Sep 28 2026 - 07:51:34 +0000)
+
+[power-path trace build]
+image_sha256=47e60c743323181bf2b6798b63b42d2b686797b59a57ca5680d46dba74bd4002
+bootloader_sha256=4854861cab279ff3ceb6945319bfd7859f8c5f7ec369713e9e1eaa9624e36f4d
+boot0_source_sha256=38a5f181bb514837ea6fad957415935b4e512b3ef33548d95eab50409694f9ac
+flash_transferred_bytes=805306368
+flash_verify_errorCode=0
+flash_result=Raw disk image flashed successfully
+
+[power-path trace cold boot]
+U-Boot SPL 2026.07 (Sep 28 2026 - 09:05:16 +0000)
+LYNX_MMC_POWER_OFF: dev=legacy phase=clock-before
+LYNX_MMC_POWER_OFF: dev=legacy phase=clock-after
+U-Boot 2026.07 (Sep 28 2026 - 09:05:16 +0000) Allwinner Technology
+Loading Environment from FAT... LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=clock-before
+LYNX_MMC_IOS: mmc=2 width=0 clock=0 mclk=0x80000000 ntsr=0x01710000 drv_dl=0x00030080 samp_dl=0x00000080 width_reg=0x00000000
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=clock-after
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vmmc-before supply=cldo3
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vmmc-after ret=0
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vqmmc-before supply=cldo1
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vqmmc-after ret=0
+Unable to read "uboot.env" from mmc1:1...
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=clock-before
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=clock-after
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vmmc-before supply=cldo3
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vmmc-after ret=0
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vqmmc-before supply=cldo1
+LYNX_MMC_POWER_OFF: dev=mmc@4022000 phase=vqmmc-after ret=0
+Found /extlinux/extlinux.conf
+Starting kernel ...
+[    2.317680] mmc1: new high speed DDR MMC card at address 0001
+[    3.092055] VFS: Mounted root (ext4 filesystem) on device 179:2.
+Avaota A1 mainline Linux / Buildroot 2026.05.1
+avaota-a1 login:
+
+[interpretation]
+The trace-only build differs from the failing release path by synchronous UART
+prints around clock and regulator operations. Both CLDO3 and CLDO1 were really
+disabled (ret=0), yet the board completed the boot. The added UART latency
+therefore changes the outcome and proves a timing-sensitive MMC/PMIC power-cycle
+race. This single successful boot is diagnostic evidence, not release
+qualification.

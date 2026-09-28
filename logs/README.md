@@ -10,6 +10,9 @@
 - `successful-v9-cold-boot-20260901.log` is the concise acceptance record for
   the final TM4 fix: successful FES verification plus two cold boots through
   SPL, U-Boot, Linux and a Buildroot root shell.
+- `mmc-power-timing-20260928.log` records the reproduced v9 reset loop, the
+  rejected repeated-HWRST hypothesis, and the trace-only build that reached the
+  Buildroot login prompt after UART markers changed MMC/PMIC power-cycle timing.
 
 The original development archive also contains failed experiments and raw
 per-transfer progress. Those files are not published here because they include

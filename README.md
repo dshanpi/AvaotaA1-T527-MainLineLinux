@@ -132,8 +132,10 @@ BootROM FEL
   小块读取仍不足以消除 CRC；这些镜像已废弃。
 - 2026-09-01 v9 加入 T527（主线内部使用 `SUN55I_A523` 族名）MMC2 的 TM4
   冷启动初始化；Linux、DTB、extlinux 和 rootfs 沿用已工作内容。
-- v9 已经完成 FES 整盘写入/校验，并连续两次冷启动进入 Buildroot root shell；
-  状态为“实机验证通过”。
+- v9 在 2026-09-01 的记录中完成过 FES 整盘写入/校验，并连续两次冷启动进入
+  Buildroot root shell。2026-09-28 使用相同发布哈希重新烧写时，复现了 U-Boot
+  FAT 环境初始化阶段的循环复位。加入 MMC/PMIC 电源路径串口标记后可启动，
+  证明该路径存在时序竞争；正式修复仍需重复冷启动验收。
 
 ## 文档
 
@@ -146,3 +148,4 @@ BootROM FEL
 - [移植顺序](docs/porting-order.md)
 - [开发记录](docs/development-journal.md)
 - [v9 实机验收记录](logs/successful-v9-cold-boot-20260901.log)
+- [2026-09-28 MMC/PMIC 时序事件](docs/incident-20260928-mmc-power-timing.md)
